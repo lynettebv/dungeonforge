@@ -1,0 +1,26 @@
+name: Sub-task
+description: One concrete step inside a user story. No user-facing value on its own, and that is fine.
+title: "[TASK] "
+labels: ["sub-task"]
+body:
+  - type: input
+    id: parent
+    attributes:
+      label: Parent story
+      placeholder: "#12"
+    validations:
+      required: true
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What needs doing
+      placeholder: "Add a private constructor and a static getInstance() to GameConfig."
+    validations:
+      required: true
+
+  - type: textarea
+    id: done
+    attributes:
+      label: How I will know it is finished
+      placeholder: "SingletonTest.configReturnsTheSameInstance() passes."
