@@ -1,0 +1,35 @@
+name: Bug report
+description: Something behaves differently from its acceptance criteria.
+title: "[BUG] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+      description: Quote the acceptance criterion it violates, if there is one.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: What actually happened
+      description: Paste the error or the wrong output. Full stack trace beats a summary.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      value: |
+        1. 
+        2. 
+        3. 
+
+  - type: input
+    id: commit
+    attributes:
+      label: Commit or tag where you saw it
+      placeholder: "v0.3.0 or a2b1c3d"

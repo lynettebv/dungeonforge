@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Course notes and pattern lessons
+    url: https://thartmanoftheredwoods.github.io/CIS-18/week_1.html
+    about: Weekly lecture notes and pattern references.
+  - name: Agile Scrum board example
+    url: https://github.com/THartmanOfTheRedwoods/AgileScrum
+    about: How epics, user stories and sub-tasks are organised in this course.

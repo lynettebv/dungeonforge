@@ -1,0 +1,46 @@
+# CIS-18 Continuous Integration
+#
+# Runs on every push and every pull request. A red check here BLOCKS your PR, which is
+# the whole point: your Definition of Done stops being a promise and becomes a machine.
+#
+# Try breaking a test on purpose once, push it, and read the log. Do it in Week 2 when
+# nothing is at stake rather than in Week 9 when something is.
+
+name: build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Compile and test on JDK 21
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Compile
+        run: mvn -B -ntp compile
+
+      - name: Run tests
+        run: mvn -B -ntp test
+
+      - name: Publish test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: target/surefire-reports/
+          if-no-files-found: ignore

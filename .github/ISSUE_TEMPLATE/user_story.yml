@@ -1,0 +1,98 @@
+name: User Story
+description: One user-visible capability, finishable inside a single sprint.
+title: "[STORY] "
+labels: ["user-story"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A story describes a NEED, not an implementation. If you find yourself naming
+        classes or data structures here, you are writing a sub-task, not a story.
+
+  - type: input
+    id: epic
+    attributes:
+      label: Parent epic
+      description: Issue number of the epic this belongs to, e.g. "#3"
+      placeholder: "#3"
+    validations:
+      required: true
+
+  - type: textarea
+    id: story
+    attributes:
+      label: Story
+      description: Keep the three clauses. The "so that" is the one people skip and the one that matters.
+      value: |
+        As a <role>,
+        I want <capability>,
+        so that <benefit>.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: If you cannot write "Then" as something checkable, the story is not Testable yet.
+      value: |
+        - Given <context>, when <action>, then <observable result>.
+        - Given <context>, when <action>, then <observable result>.
+    validations:
+      required: true
+
+  - type: textarea
+    id: subtasks
+    attributes:
+      label: Sub-tasks
+      value: |
+        - [ ] 
+        - [ ] 
+        - [ ] 
+
+  - type: dropdown
+    id: points
+    attributes:
+      label: Estimate (story points)
+      description: Relative size, not hours. Anything 8 or 13 is an epic in disguise — split it.
+      options: ["1", "2", "3", "5", "8", "13"]
+    validations:
+      required: true
+
+  - type: dropdown
+    id: pattern
+    attributes:
+      label: Pattern this story exercises
+      options:
+        - none / foundational
+        - Singleton
+        - Factory Method
+        - Abstract Factory
+        - Strategy
+        - Observer
+        - Command
+        - State
+        - Decorator
+        - Template Method
+        - Adapter
+        - Facade
+        - Composite
+        - Iterator
+        - Pipeline
+        - Proxy
+        - MVC (compound)
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: invest
+    attributes:
+      label: INVEST self-check
+      description: Tick each one you are confident about. An honest blank is worth more than a dishonest tick.
+      options:
+        - label: "Independent — buildable without waiting on another story"
+        - label: "Negotiable — describes the need, not the implementation"
+        - label: "Valuable — someone actually benefits"
+        - label: "Estimable — I can guess the size"
+        - label: "Small — fits in one sprint"
+        - label: "Testable — the acceptance criteria are checkable"
