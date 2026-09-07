@@ -11,7 +11,7 @@ package dungeonforge;
  *
  * From Week 3 this file grows into the real game. Do not delete it.
  */
-public final class Main {
+public final class Main
 
     /** Bumped every sprint. Week 3 replaces this with the GameConfig singleton. */
     public static final String VERSION = "0.1.0";
