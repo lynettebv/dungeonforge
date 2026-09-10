@@ -23,9 +23,8 @@ and figure out how to get past the errors I was creating.
 > One. Specific. Actionable. "Be more organised" is not actionable.
 > "Write the test before the implementation for at least one story" is.
 
-- I will centralize all the commands I found that don't work for Windows and include the Windows version.
-- I will make sure I can find these easily so I don't have to search as much when I encounter them in the future.
-- I will also make a list of other commands that may come up and their Windows translations.
+- I will centralize all the commands I found that don't work for Windows,
+plus some that I may encounter in the future, and include the Windows translation.
 
 ---
 
