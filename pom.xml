@@ -7,11 +7,11 @@
 
   <groupId>edu.redwoods.cis18</groupId>
   <artifactId>dungeonforge</artifactId>
-  <version>0.1.0</version>
+  <version>0.2.0</version>
   <packaging>jar</packaging>
 
   <name>DungeonForge</name>
-  <description>CIS-18 semester project. Week 2: walking skeleton.</description>
+  <description>CIS-18 semester project. Week 3: Singleton.</description>
 
   <properties>
     <maven.compiler.release>21</maven.compiler.release>
