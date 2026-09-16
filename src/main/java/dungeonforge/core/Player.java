@@ -1,5 +1,7 @@
 package dungeonforge.core;
 
+import dungeonforge.config.GameConfig;
+
 /**
  * WEEK 1 -- the player.
  *
@@ -14,7 +16,10 @@ public class Player extends Entity {
 
     public Player(String name) {
         // Starting HP, attack, defense. Hardcoded. This is one of the things US-1.1 is about.
-        super(name, 60, 8, 2);
+        super(name,
+                GameConfig.getInstance().getInt("playerStartingHp"),
+                GameConfig.getInstance().getInt("playerStartingAttack"),
+                GameConfig.getInstance().getInt("playerStartingDefense"));
     }
 
     public int getGold()          { return gold; }
@@ -24,7 +29,7 @@ public class Player extends Entity {
 
     /** Backpack capacity in kilograms. Also hardcoded. */
     public double carryCapacity() {
-        return 60.0;
+        return GameConfig.getInstance().getDouble("carryCapacity");
     }
 
     @Override

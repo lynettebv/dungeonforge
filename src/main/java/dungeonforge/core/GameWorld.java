@@ -1,5 +1,7 @@
 package dungeonforge.core;
 
+import dungeonforge.config.GameConfig;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -27,10 +29,10 @@ public class GameWorld {
     }
 
     private void generate() {
-        int dungeonDepth = 3;         // hardcoded
-        int roomsPerLevel = 8;        // hardcoded
-        int maxMonstersPerRoom = 2;   // hardcoded
-
+        GameConfig cfg = GameConfig.getInstance();
+        int dungeonDepth = cfg.getInt("dungeonDepth");         // hardcoded
+        int roomsPerLevel = cfg.getInt("roomsPerLevel");        // hardcoded
+        int maxMonstersPerRoom = cfg.getInt("maxMonstersPerRoom");
         for (int d = 1; d <= dungeonDepth; d++) {
             DungeonLevel level = new DungeonLevel(d);
             for (int r = 0; r < roomsPerLevel; r++) {
