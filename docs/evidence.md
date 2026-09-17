@@ -146,14 +146,25 @@ diff after1.txt after2.txt && echo "IDENTICAL"
 
 **Result:**
 
-```
-
+```bash
+$ diff after1.txt after2.txt && echo "IDENTICAL"
+IDENTICAL
 ```
 
 **Now a different seed (AC4). Paste enough to show the world changed:**
 
-```
-
+```bash
+$ diff after2.txt after3.txt                    
+10,13c10,13
+< L1R0: Bone Priest (17/17 HP, ATK 6)
+< L1R1: Wight (16/16 HP, ATK 5)  Crypt Rat (15/15 HP, ATK 5)
+< L1R2: (empty)
+< L1R3: Crypt Rat (14/14 HP, ATK 6)  Skeleton (17/17 HP, ATK 4)
+---
+> L1R0: Wight (16/16 HP, ATK 5)
+> L1R1: Skeleton (14/14 HP, ATK 4)  Bone Priest (15/15 HP, ATK 5)
+> L1R2: Crypt Rat (16/16 HP, ATK 5)  Crypt Rat (14/14 HP, ATK 4)
+> L1R3: (empty)
 ```
 
 ## 4. AFTER — US-1.3, the rule is enforced
@@ -161,7 +172,48 @@ diff after1.txt after2.txt && echo "IDENTICAL"
 **Paste your `mvn test` summary:**
 
 ```
-
+ mvn test
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ------------------< edu.redwoods.cis18:dungeonforge >-------------------
+[INFO] Building DungeonForge 0.2.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.4.0:resources (default-resources) @ dungeonforge ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dungeonforge ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.4.0:testResources (default-testResources) @ dungeonforge ---
+[INFO] skip non existing resourceDirectory C:\Users\lynet\IdeaProjects\dungeonforge\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dungeonforge ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 2 source files with javac [debug release 21] to target\test-classes
+[INFO] 
+[INFO] --- surefire:3.2.5:test (default-test) @ dungeonforge ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dungeonforge.SingletonTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.062 s -- in dungeonforge.SingletonTest
+[INFO] Running dungeonforge.SkeletonTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dungeonforge.SkeletonTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  2.079 s
+[INFO] Finished at: 2026-09-17T01:48:46-07:00
+[INFO] ------------------------------------------------------------------------
 ```
 
 **Paste the URL of the green CI check on your pull request:**
