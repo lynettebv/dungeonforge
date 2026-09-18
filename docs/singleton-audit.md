@@ -14,7 +14,7 @@ Answer with the test we will use all semester:
 
 > **Would a second instance be a BUG, or merely unusual?**
 >
-> If two instances would produce *incorrect behaviour* — not just wasted memory, not just
+> If two instances would produce *incorrect behavior* — not just wasted memory, not just
 > inconvenience — the class may deserve to be a Singleton.
 > If two instances would merely be *odd*, it is a dependency, and you should pass it in.
 
@@ -22,30 +22,38 @@ Fill in every row. Two of the eight are genuine singletons; you already know whi
 you built them this week. Your job is to defend the other six answers.
 
 | # | Class | What it does | Singleton? | Would a 2nd instance be a bug, or just unusual? Why? |
-|---|---|---|---|---|
-| 1 | `GameConfig` | Holds every tunable setting | | |
-| 2 | `RandomSource` | The one seeded RNG | | |
-| 3 | `Player` | The player character | | |
-| 4 | `MonsterFactory` (Wk 4) | Turns blueprints into monsters | | |
-| 5 | `EventBus` (Wk 5) | Publishes game events to subscribers | | |
-| 6 | `CommandHistory` (Wk 7) | The undo stack | | |
-| 7 | `SaveSystemFacade` (Wk 12) | Reads and writes save files | | |
-| 8 | `Logger` | Writes diagnostic output to a file | | |
+|---|---|---|--------|------------------------------------------------------|
+| 1 | `GameConfig` | Holds every tunable setting | x      |                                                      |
+| 2 | `RandomSource` | The one seeded RNG | x      |                                                      |
+| 3 | `Player` | The player character |        | x                                                    |
+| 4 | `MonsterFactory` (Wk 4) | Turns blueprints into monsters |        | x                                                    |
+| 5 | `EventBus` (Wk 5) | Publishes game events to subscribers |        | x                                                    |
+| 6 | `CommandHistory` (Wk 7) | The undo stack |        | x                                                    |
+| 7 | `SaveSystemFacade` (Wk 12) | Reads and writes save files |        | x                                                    |
+| 8 | `Logger` | Writes diagnostic output to a file |        | x                                                    |
 
 ## The three that will cause arguments
 
 Rows 5, 7 and 8 are the interesting ones, and reasonable engineers disagree about all three.
 Pick **one** of them and write a paragraph:
 
-**Which one:** ______
+**Which one:** ___Logger___
 
 **The case FOR making it a Singleton:**
 
+The Singleton pattern offers a convenient and efficient way to manage logging
+and access the same Logger anywhere in our code. This can keep logging behavior consistent.
 
 **The case AGAINST:**
 
+Besides the downside that Singletons make unit testing harder,
+making Logger a Singleton can make code harder to maintain. Because of issues
+with global access, Logger may easily take on responsibilities that don't belong to it.
 
 **What you would actually do in this project, and why:**
+
+For this project, I would avoid making Logger a singleton and potentially complicating unit testing even more.
+GameConfig and RandomSource are enough, I do not want to over-apply the pattern by creating a third one.
 
 
 > There is no answer key for this paragraph. You are graded on whether you engaged with the
@@ -58,4 +66,5 @@ undo the global state that the Singleton created.
 
 **In one or two sentences: what is that method telling you about the pattern?**
 
-
+This method is highlighting how a Singleton makes your code harder to unit test.
+You have to straight up undo the state your Singleton maintains just to get your tests to run correctly.

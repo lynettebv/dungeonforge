@@ -218,9 +218,11 @@ $ diff after2.txt after3.txt
 
 **Paste the URL of the green CI check on your pull request:**
 
+https://github.com/lynettebv/dungeonforge/actions/runs/35202252078/job/105139537482
 
 ## 5. The one-line summary for your Sprint Review
 
 > What can the project do now that it could not do last week?
 
-
+The project can now handle uncontrollable randomness using Singletons
+that allow the same results to be recreated using the same seed.
