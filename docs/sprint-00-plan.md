@@ -35,15 +35,16 @@
 > learn this from theory.
 
 | Story | Estimated points | Actual hours | Was the estimate high, low, or about right? |
-|---|---|---|---|
-| S0.1 | 3 | | |
-| S0.2 | 2 | | |
-| S0.3 | 2 | | |
+|---|---|--------------|---------------------------------------------|
+| S0.1 | 3 | 2            | low                                         |
+| S0.2 | 2 | 3            | high                                        |
+| S0.3 | 2 | 2            | about right                                 |
 
-**Points completed (my first velocity number):** ____
+**Points completed (my first velocity number):** __7__
 
 ## Sprint Review — one sentence
 
 > What can the project do now that it could not do at the start of the week?
 
-
+By the end of this sprint, the project was able to build and test itself, 
+stop broken code from being merged, and keep track of work being done on our board.
