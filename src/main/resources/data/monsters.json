@@ -1,0 +1,19 @@
+{
+  "skeleton":     { "name": "Skeleton",      "hp": 14, "attack": 4, "xp": 6,  "theme": "crypt" },
+  "crypt_rat":    { "name": "Crypt Rat",     "hp": 9,  "attack": 3, "xp": 4,  "theme": "crypt" },
+  "wight":        { "name": "Wight",         "hp": 18, "attack": 5, "xp": 10, "theme": "crypt" },
+  "bone_priest":  { "name": "Bone Priest",   "hp": 16, "attack": 4, "xp": 12, "theme": "crypt" },
+  "bone_tyrant":  { "name": "Bone Tyrant",   "hp": 42, "attack": 9, "xp": 45, "theme": "crypt", "boss": true },
+
+  "imp":          { "name": "Imp",           "hp": 10, "attack": 5, "xp": 7,  "theme": "forge" },
+  "slag_hound":   { "name": "Slag Hound",    "hp": 15, "attack": 6, "xp": 9,  "theme": "forge" },
+  "ember_sprite": { "name": "Ember Sprite",  "hp": 8,  "attack": 6, "xp": 8,  "theme": "forge" },
+  "forge_golem":  { "name": "Forge Golem",   "hp": 24, "attack": 6, "xp": 16, "theme": "forge" },
+  "forge_tyrant": { "name": "Forge Tyrant",  "hp": 46, "attack": 10, "xp": 48, "theme": "forge", "boss": true },
+
+  "frost_wight":  { "name": "Frost Wight",   "hp": 19, "attack": 6, "xp": 12, "theme": "frost" },
+  "rime_stalker": { "name": "Rime Stalker",  "hp": 16, "attack": 7, "xp": 13, "theme": "frost" },
+  "ice_lurker":   { "name": "Ice Lurker",    "hp": 21, "attack": 5, "xp": 11, "theme": "frost" },
+  "hoar_shade":   { "name": "Hoar Shade",    "hp": 12, "attack": 7, "xp": 14, "theme": "frost" },
+  "rime_tyrant":  { "name": "Rime Tyrant",   "hp": 50, "attack": 11, "xp": 52, "theme": "frost", "boss": true }
+}
