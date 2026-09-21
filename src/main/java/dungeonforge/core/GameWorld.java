@@ -2,6 +2,7 @@ package dungeonforge.core;
 
 import dungeonforge.config.GameConfig;
 import dungeonforge.config.RandomSource;
+import dungeonforge.factory.MonsterFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,10 @@ public class GameWorld {
     private final Player player;
     private final List<DungeonLevel> levels = new ArrayList<>();
 
+
+
+    private MonsterFactory monsterFactory = new MonsterFactory();
+
     public GameWorld(Player player) {
         this.player = player;
         generate();
@@ -36,7 +41,8 @@ public class GameWorld {
                 Room room = new Room("L" + d + "R" + r);
                 int count = RandomSource.getInstance().nextInt(maxMonstersPerRoom + 1);
                 for (int m = 0; m < count; m++) {
-                    room.addMonster(spawn(d));
+                    String id = RandomSource.getInstance().pick(monsterFactory.idsForTheme("crypt"));
+                    room.addMonster(monsterFactory.create(id, d));
                 }
                 level.addRoom(room);
             }
@@ -44,14 +50,9 @@ public class GameWorld {
         }
     }
 
-    private Monster spawn(int depth) {
-        String[] species = {"Skeleton", "Crypt Rat", "Wight", "Bone Priest"};
-        String pick = RandomSource.getInstance().pick(species);
-        return new Monster(pick, 12 + depth * 4, 4 + depth, 6 + depth * 3);
-    }
-
     public Player getPlayer()             { return player; }
     public List<DungeonLevel> getLevels() { return levels; }
+    public MonsterFactory getMonsterFactory() { return monsterFactory; }
 
     public int totalMonsters() {
         int n = 0;

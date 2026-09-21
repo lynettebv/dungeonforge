@@ -3,6 +3,7 @@
   "crypt_rat":    { "name": "Crypt Rat",     "hp": 9,  "attack": 3, "xp": 4,  "theme": "crypt" },
   "wight":        { "name": "Wight",         "hp": 18, "attack": 5, "xp": 10, "theme": "crypt" },
   "bone_priest":  { "name": "Bone Priest",   "hp": 16, "attack": 4, "xp": 12, "theme": "crypt" },
+  "ghouls":       { "name": "Ghoul",        "hp": 18, "attack": 2, "xp": 12, "theme": "crypt" },
   "bone_tyrant":  { "name": "Bone Tyrant",   "hp": 42, "attack": 9, "xp": 45, "theme": "crypt", "boss": true },
 
   "imp":          { "name": "Imp",           "hp": 10, "attack": 5, "xp": 7,  "theme": "forge" },
