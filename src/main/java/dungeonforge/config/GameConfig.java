@@ -35,7 +35,7 @@ public final class GameConfig {
 
     }
 
-    private void loadFromClasspath(String resourceName) {
+        private void loadFromClasspath(String resourceName) {
         String text = readResource(resourceName);
         if (text == null) return;
         try  {

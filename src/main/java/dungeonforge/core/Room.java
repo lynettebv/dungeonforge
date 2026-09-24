@@ -2,7 +2,6 @@ package dungeonforge.core;
 
 import java.util.ArrayList;
 import java.util.List;
-import dungeonforge.config.RandomSource;
 import dungeonforge.items.Chest;
 import dungeonforge.items.Item;
 
@@ -12,13 +11,6 @@ import dungeonforge.items.Item;
  */
 public class Room {
 
-    private static final String[] FLAVORS = {
-        "Damp stone. Something drips in the dark, patiently.",
-        "Burial niches line the walls. Most are empty. Most.",
-        "The air tastes of old dust and older grief.",
-        "Your footsteps come back a half-second late."
-    };
-
     private final String id;
     private String flavor;
     private final List<Monster> monsters = new ArrayList<>();
@@ -27,7 +19,7 @@ public class Room {
 
     public Room(String id) {
         this.id = id;
-        this.flavor = RandomSource.getInstance().pick(FLAVORS);
+        this.flavor = "";
     }
 
     public String getId()               { return id; }

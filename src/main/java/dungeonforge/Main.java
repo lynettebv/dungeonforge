@@ -72,7 +72,7 @@ public final class Main {
             System.out.println();
 
             for (DungeonLevel level : world.getLevels()) {
-                System.out.println("-- Level " + level.getDepth() + " --");
+                System.out.println("-- Level " + level.getDepth() + ": " + level.getThemeName() + " --");
                 for (Room room : level.getRooms()) {
                     StringBuilder line = new StringBuilder("  " + room.getId() + ": ");
                     if (room.getMonsters().isEmpty()) {
