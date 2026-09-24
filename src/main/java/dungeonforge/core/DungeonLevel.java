@@ -12,11 +12,16 @@ import java.util.List;
 public class DungeonLevel {
 
     private final int depth;
+    private final String themeName;
     private final List<Room> rooms = new ArrayList<>();
 
-    public DungeonLevel(int depth) { this.depth = depth; }
+    public DungeonLevel(int depth, String themeName) {
+        this.depth = depth;
+        this.themeName = themeName;
+    }
 
     public int getDepth()        { return depth; }
+    public String getThemeName() { return themeName; }
     public List<Room> getRooms() { return rooms; }
     public void addRoom(Room r)  { rooms.add(r); }
 }
