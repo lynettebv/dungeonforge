@@ -16,5 +16,9 @@
   "rime_stalker": { "name": "Rime Stalker",  "hp": 16, "attack": 7, "xp": 13, "theme": "frost" },
   "ice_lurker":   { "name": "Ice Lurker",    "hp": 21, "attack": 5, "xp": 11, "theme": "frost" },
   "hoar_shade":   { "name": "Hoar Shade",    "hp": 12, "attack": 7, "xp": 14, "theme": "frost" },
-  "rime_tyrant":  { "name": "Rime Tyrant",   "hp": 50, "attack": 11, "xp": 52, "theme": "frost", "boss": true }
+  "rime_tyrant":  { "name": "Rime Tyrant",   "hp": 50, "attack": 11, "xp": 52, "theme": "frost", "boss": true },
+
+  "direwolf":     { "name": "Direwolf",    "hp": 25, "attack": 6, "xp": 12, "theme": "winterfell" },
+  "white_walkers":{ "name": "White Walkers",    "hp": 18, "attack": 7, "xp": 14, "theme": "winterfell" },
+  "night_king":   { "name": "Night King",   "hp": 55, "attack": 13, "xp": 54, "theme": "winterfell", "boss": true }
 }
