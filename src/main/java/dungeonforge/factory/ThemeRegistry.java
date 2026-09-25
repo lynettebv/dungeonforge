@@ -14,7 +14,7 @@ public class ThemeRegistry {
     }
 
     public ThemeKit forDepth(int depth) {
-        return kits.get(depth - 1 % kits.size());
+        return kits.get((depth - 1) % kits.size());
     }
 
     public int size() { return kits.size(); }
