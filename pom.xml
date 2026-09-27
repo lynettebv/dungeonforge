@@ -7,11 +7,11 @@
 
   <groupId>edu.redwoods.cis18</groupId>
   <artifactId>dungeonforge</artifactId>
-  <version>0.3.0</version>
+  <version>0.4.0</version>
   <packaging>jar</packaging>
 
   <name>DungeonForge</name>
-  <description>CIS-18 semester project. Week 4: Factory + Abstract Factory.</description>
+  <description>CIS-18 semester project. Week 5: Strategy + Observer.</description>
 
   <properties>
     <maven.compiler.release>21</maven.compiler.release>

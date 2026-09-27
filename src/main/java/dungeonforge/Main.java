@@ -2,6 +2,7 @@ package dungeonforge;
 
 import dungeonforge.config.GameConfig;
 import dungeonforge.config.RandomSource;
+import dungeonforge.core.Combat;
 import dungeonforge.core.DungeonLevel;
 import dungeonforge.core.GameWorld;
 import dungeonforge.core.Monster;
@@ -19,7 +20,7 @@ import net.sourceforge.argparse4j.inf.Namespace;
  */
 public final class Main {
 
-    public static final String VERSION = "0.3.0";
+    public static final String VERSION = "0.5.0";
 
     private Main() { }
 
@@ -62,7 +63,7 @@ public final class Main {
             // Extract the argument values
 
             Long seed = res.getLong("seed");
-            if( seed >= 0 ) {
+            if (seed >= 0) {
                 RandomSource.getInstance().reseed(seed);
             }
             Player player = new Player(res.getString("playerName"));
@@ -80,14 +81,49 @@ public final class Main {
                     } else {
                         for (Monster m : room.getMonsters()) line.append(m.describe()).append("  ");
                     }
+                    if (room.hasChest()) {
+                        line.append(" [").append(room.getChest().getName()).append(": ");
+                        for (var item : room.getChest().getContents()) line.append(item.getName()).append(", ");
+                        line.setLength(line.length() - 2);
+                        line.append("]");
+                    }
                     System.out.println(line.toString().trim());
+                    if (!room.getFlavor().isEmpty() && room.getMonsters().isEmpty() && !room.hasChest()) {
+                        System.out.println("        \"" + room.getFlavor() + "\"");
+                    }
                 }
             }
             System.out.println();
-            System.out.println("Total monsters: " + world.totalMonsters());
+            System.out.println("=== THE DELVE ===");
+            delve(world, player);
+
+            System.out.println();
+            System.out.println("Themes registered: " + world.getThemes().themeNames());
+            System.out.println("Monster blueprints loaded: " + world.getMonsterFactory().blueprintCount());
+            System.out.println("Total monsters: " + world.totalMonsters() + "   Total loot: " + world.totalLoot());
         } catch (ArgumentParserException e) {
             parser.handleError(e);
             System.exit(1);
         }
+    }
+
+    /** Walks the whole dungeon, fighting whatever is in the way. */
+    private static void delve (GameWorld world, Player player){
+        Combat combat = new Combat();
+        for (DungeonLevel level : world.getLevels()) {
+            System.out.println("  Descending to level " + level.getDepth()
+                    + " (" + level.getThemeName() + ")");
+            for (Room room : level.getRooms()) {
+                if (!room.getMonsters().isEmpty()) {
+                    System.out.println("    " + room.getId());
+                    if (!combat.fight(player, room, level.getDepth())) return;   // died
+                }
+                Combat.restAfterRoom(player);
+            }
+        }
+        System.out.println();
+        System.out.println(player.isAlive()
+                ? "  You climb back into daylight. " + player.describe()
+                : "  You die in the dark. XP " + player.getXp() + ", gold " + player.getGold());
     }
 }

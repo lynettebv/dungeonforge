@@ -1,26 +1,24 @@
 package dungeonforge.core;
 
 
-import dungeonforge.config.RandomSource;
-
 /**
  * WEEK 1 -- a monster.
- * TODO(week 3, US-1.2): this class owns its own Random. So does Room. So does GameWorld.
- * Three independent sources of randomness means the same seed can never reproduce the same
- * dungeon, which means a bug you hit once may never be reproducible. Count how many separate
- * Random instances exist in this project before you start.
+ * WEEK 3 (US-1.2) -- its private Random is gone. Stat variance now comes from the one
+ * seeded RandomSource, so the same seed always produces the same monster.
  */
 public class Monster extends Entity {
 
     private final String species;
     private final int xpReward;
 
-    public Monster(String species, int baseHp, int baseAttack, int xpReward) {
-        // A little stat variance so no two monsters are identical.
-        super(species,
-              baseHp + RandomSource.getInstance().between(-2, 2),
-              baseAttack + RandomSource.getInstance().between(-1, 1),
-              0);
+    /**
+     * WEEK 5 correction: stat variance used to be rolled here AND again in MonsterFactory,
+     * so every monster was randomised twice and no test could build one with exact hit
+     * points. Variance is a CREATION concern, so it now lives only in the factory. A Monster
+     * is exactly what it was constructed with.
+     */
+    public Monster(String species, int maxHp, int attackPower, int xpReward) {
+        super(species, maxHp, attackPower, 0);
         this.species = species;
         this.xpReward = xpReward;
     }

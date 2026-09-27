@@ -4,10 +4,8 @@ import dungeonforge.config.GameConfig;
 
 /**
  * WEEK 1 -- the player.
- *
- * TODO(week 3, US-1.1): those four numbers are hardcoded. A game designer who wants to
- * rebalance the game has to edit Java and recompile. Find them all -- they are not only
- * in this file.
+ * WEEK 3 (US-1.1) -- every tunable number now comes from GameConfig. There is not one
+ * numeric literal left in this class, which is what acceptance criterion 2 demanded.
  */
 public class Player extends Entity {
 
@@ -15,11 +13,10 @@ public class Player extends Entity {
     private int xp;
 
     public Player(String name) {
-        // Starting HP, attack, defense. Hardcoded. This is one of the things US-1.1 is about.
         super(name,
-                GameConfig.getInstance().getInt("playerStartingHp"),
-                GameConfig.getInstance().getInt("playerStartingAttack"),
-                GameConfig.getInstance().getInt("playerStartingDefense"));
+              GameConfig.getInstance().getInt("playerStartingHp"),
+              GameConfig.getInstance().getInt("playerStartingAttack"),
+              GameConfig.getInstance().getInt("playerStartingDefense"));
     }
 
     public int getGold()          { return gold; }
@@ -27,7 +24,7 @@ public class Player extends Entity {
     public void addGold(int g)    { gold += g; }
     public void addXp(int x)      { xp += x; }
 
-    /** Backpack capacity in kilograms. Also hardcoded. */
+    /** Backpack capacity in kilograms, from config. */
     public double carryCapacity() {
         return GameConfig.getInstance().getDouble("carryCapacity");
     }
