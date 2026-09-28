@@ -8,14 +8,13 @@ import dungeonforge.core.GameWorld;
 import dungeonforge.core.Monster;
 import dungeonforge.core.Player;
 import dungeonforge.core.Room;
-import dungeonforge.events.EventBus;
-import dungeonforge.events.EventType;
-import dungeonforge.events.GameEvent;
-import dungeonforge.events.QuestTracker;
+import dungeonforge.events.*;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
+
+import java.util.Iterator;
 
 /**
  * WEEK 3 -- the same demo, now reproducible.
@@ -98,12 +97,68 @@ public final class Main {
                 }
             }
             System.out.println();
+            int monstersAtStart = world.totalMonsters();
+            int lootAtStart = world.totalLoot();
+
             System.out.println("=== THE DELVE ===");
+
+            // WEEK 5 -- Observer wiring. This is the ONLY place the listeners are named.
+            // Combat has no idea any of them exist.
             EventBus bus = new EventBus();
             QuestTracker quests = new QuestTracker(bus);
+            AchievementSystem achievements = new AchievementSystem(bus);
+            CombatLog log = new CombatLog(200);
             bus.subscribe(quests);
+            bus.subscribe(achievements);
+            bus.subscribe(log);
 
             delve(world, player, bus);
+
+            var lines = log.getLines();
+
+            System.out.println();
+            System.out.println("-- combat log: opening --");
+            Iterator<String> it = lines.iterator();
+            int i = 0;
+            while(i < 8 && it.hasNext()) {
+                System.out.println("  " + it.next());
+                i++;
+            }
+
+            // The lines that prove the STRATEGY pattern is doing something. Each of these is a
+            // monster behaving differently from another monster, or from its own earlier self.
+            System.out.println();
+            System.out.println("-- strategy highlights --");
+            int shown = 0;
+            for (String line : lines) {
+                if (line.contains("changes tactics") || line.contains("flees")
+                || line.contains("mends") || line.contains("circles")) {
+                    System.out.println("  " + line);
+                    if(++shown >= 10) break;
+                }
+            }
+            if (shown == 0) System.out.println("   (none this seed -- try --seed=3)");
+
+            System.out.println();
+            System.out.println("-- combat log: ending --");
+            lines.stream()
+                    .skip(Math.max(0, lines.size() - 6))
+                    .forEach((line) -> {
+                        System.out.println("  " + line);
+                    });
+
+            System.out.println();
+            System.out.println("-- quests --");
+            for (Quest q : quests.getQuests()) System.out.println("  " + q);
+
+            System.out.println();
+            System.out.println("-- achievements --");
+            if (achievements.getUnlocked().isEmpty()) System.out.println("  (none)");
+            for (String a : achievements.getUnlocked()) System.out.println("  " + a);
+
+            System.out.println();
+            System.out.println("Listeners on the bus: " + bus.listenerCount()
+                    + "  |  log lines captured:  " + log.size());
 
             System.out.println();
             System.out.println("Themes registered: " + world.getThemes().themeNames());
@@ -122,9 +177,9 @@ public final class Main {
             bus.publish(GameEvent.of(EventType.LEVEL_ENTERED,
                     "depth", level.getDepth(), "theme", level.getThemeName()));
             for (Room room : level.getRooms()) {
-                if (!room.getMonsters().isEmpty()) {
-                    System.out.println("    " + room.getId());
-                    if (!combat.fight(player, room, level.getDepth())) return;   // died
+                if (!combat.fight(player, room, level.getDepth())) {
+                    System.out.println("  " + player.describe());
+                    return;
                 }
                 Combat.restAfterRoom(player);
             }
