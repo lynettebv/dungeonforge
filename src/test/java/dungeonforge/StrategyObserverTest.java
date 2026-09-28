@@ -31,7 +31,6 @@ class StrategyObserverTest {
         m.takeDamage(damage);
         return m;
     }
-
     // ---------- US-3.1: Strategy ----------
     @Test
     void aMonsterHoldsItsBehaviourRatherThanBeingASubclassOfIt() {
@@ -69,7 +68,8 @@ class StrategyObserverTest {
         Monster hurt = wounded(20, 15);
         room.addMonster(healer);
         room.addMonster(hurt);
-        Action a = new HealerStrategy().chooseAction(healer, new Player("P"), room);
+        Action a = new HealerStrategy().chooseAction(healer, new Player("P"),
+                room);
         assertEquals(Action.Type.HEAL_ALLY, a.getType());
         assertSame(hurt, a.getTarget());
     }
@@ -82,7 +82,7 @@ class StrategyObserverTest {
                 new HealerStrategy().chooseAction(healer, new Player("P"),
                         room).getType());
     }
-    /** The data file decides behavior, so a designer can retune it without a
+    /** The data file decides behaviour, so a designer can retune it without a
      programmer. */
     @Test
     void theFactoryAssignsBehaviourFromTheDataFile() {
@@ -94,6 +94,30 @@ class StrategyObserverTest {
                 1).getStrategy().name());
         assertEquals("aggressive", factory.create("skeleton",
                 1).getStrategy().name());
+    }
+// ---------- US-3.2: the runtime swap ----------
+    /** THE moment the pattern justifies itself. */
+    @Test
+    void theSameObjectBehavesDifferentlyAfterASwap() {
+        Monster m = wounded(20, 18);
+        Player p = new Player("P");
+        Room r = new Room("r");
+        m.setStrategy(new AggressiveStrategy());
+        assertEquals(Action.Type.ATTACK, m.getStrategy().chooseAction(m, p,
+                r).getType());
+        m.setStrategy(new SkittishStrategy()); // one line, same object
+        assertEquals(Action.Type.FLEE, m.getStrategy().chooseAction(m, p,
+                r).getType());
+    }
+    @Test
+    void combatSwapsAWoundedMonsterToSkittishAndAnnouncesIt() {
+        Room room = new Room("r");
+        Monster m = new Monster("Slag Hound", 25, 3, 5);
+        m.setStrategy(new AggressiveStrategy());
+        room.addMonster(m);
+        new Combat().fight(new Player("P"), room, 1);
+        assertFalse(m.getStrategy().name() == "aggressive",
+                "a monster driven below the flee threshold should change tactics");
     }
     // ---------- regression ----------
     @Test

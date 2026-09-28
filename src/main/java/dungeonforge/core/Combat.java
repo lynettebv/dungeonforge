@@ -1,6 +1,7 @@
 package dungeonforge.core;
 
 import dungeonforge.behavior.Action;
+import dungeonforge.behavior.SkittishStrategy;
 import dungeonforge.config.GameConfig;
 
 import java.util.ArrayList;
@@ -29,32 +30,58 @@ public class Combat {
 
     /** Returns true if the player survived the encounter. */
     public boolean fight(Player player, Room room, int depth) {
-        if (room.getMonsters().isEmpty()) return true;
+        if (!hasLiving(room)) return true;
 
         System.out.println("    ! " + room.getMonsters().size() + " hostile(s)");
 
         int round = 0;
         while (player.isAlive() && hasLiving(room) && round++ < MAX_ROUNDS) {
-
-            // --- player's turn: hit the first thing still standing ---
-            Monster target = firstLiving(room);
-            if (target != null) {
-                int damage = player.getAttackPower();
-                target.takeDamage(damage);
-                System.out.println("      you hit " + target.getName() + " for " + damage);
-                if (!target.isAlive()) {
-                    System.out.println("      " + target.getName() + " dies");
-                    player.addXp(target.getXpReward());
-                    player.addGold(target.getXpReward() * 2);
-                }
-            }
+            playerActs(player, room);
+            if (!hasLiving(room)) break;
 
             // --- monsters' turn ---
             for (Monster m : livingMonsters(room)) {
+                checkForTacticsChange(m);
                 monsterActs(m, player, room);
+                if(!player.isAlive()) break;
             }
         }
-        return player.isAlive();
+        if (!player.isAlive()) {
+            // TODO: publish with observer event
+            System.out.println("Game Over - Player Died");
+            return false;
+        }
+        // TODO: publish with observer event
+        System.out.println("Player Survived - Room Cleared");
+        return true;
+    }
+
+    private void playerActs(Player player, Room room) {
+        // --- player's turn: hit the first thing still standing ---
+        Monster target = firstLiving(room);
+        if (target == null) return;
+
+        int damage = player.getAttackPower();
+        target.takeDamage(damage);
+        // TODO: publish with observer event
+        System.out.println("      you hit " + target.getName() + " for " + damage);
+        if (!target.isAlive()) {
+            player.addXp(target.getXpReward());
+            player.addGold(target.getXpReward() * 2);
+            // TODO: publish with observer event
+            System.out.println("      " + target.getName() + " dies");
+        }
+    }
+
+    private void checkForTacticsChange(Monster m) {
+        double threshold = GameConfig.getInstance().getDouble("fleeThreshold");
+        if (m.hpFraction() >= threshold) return;
+        if (m.getStrategy() instanceof SkittishStrategy) return;
+
+        String from = m.getStrategy().name();
+        m.setStrategy(new SkittishStrategy());
+        // TODO: publish this event once Observer Pattern set.
+        System.out.println(m.getName() + " changed strategy from " + from + " to " + m.getStrategy().name());
     }
 
     /**
