@@ -1,0 +1,845 @@
+classDiagram
+    direction TB
+
+%% =========================================================
+%% DUNGEONFORGE - COMPLETE UML THROUGH WEEK 5
+%% Singleton + Simple Factory + Factory Method + Abstract
+%% Factory + Strategy + Observer
+%% =========================================================
+
+
+%% =========================================================
+%% SINGLETON PATTERN
+%% =========================================================
+
+    namespace Singleton_Pattern {
+
+        class GameConfig {
+            <<Singleton>>
+            -static GameConfig instance
+            -Map~String,Object~ settings
+            -GameConfig()
+            +static GameConfig getInstance()
+            -loadDefaults() void
+            -loadFromClasspath(String resourceName) void
+            +static readResource(String resourceName) String
+            +getInt(String key) int
+            +getDouble(String key) double
+            +getSeed() long
+            +static resetForTests() void
+        }
+
+        class RandomSource {
+            <<Singleton>>
+            -static RandomSource instance
+            -Random rng
+            -long seed
+            -RandomSource()
+            +static RandomSource getInstance()
+            +nextInt(int bound) int
+            +between(int lo, int hi) int
+            +nextDouble() double
+            +pick(List~T~ options) T
+            +pick(T[] options) T
+            +getSeed() long
+            +reseed(long newSeed) void
+            +static resetForTests() void
+        }
+
+        class Json {
+            <<utility>>
+            -String s
+            -int i
+            -Json(String s)
+            +static parseObject(String text) Map~String,Object~
+            -ws() void
+            -value() Object
+            -object() Map~String,Object~
+            -array() List~Object~
+            -string() String
+            -number() Double
+        }
+    }
+
+
+%% =========================================================
+%% STRATEGY PATTERN
+%% =========================================================
+
+    namespace Strategy_Pattern {
+
+class CombatStrategy {
+<<interface>>
++chooseAction(Monster self, Player player, Room room) Action
++name() String
+}
+
+class AggressiveStrategy {
+<<ConcreteStrategy>>
++chooseAction(Monster self, Player player, Room room) Action
++name() String
+}
+
+class RangedStrategy {
+<<ConcreteStrategy>>
++chooseAction(Monster self, Player target, Room room) Action
++name() String
+}
+
+class SkittishStrategy {
+<<ConcreteStrategy>>
++chooseAction(Monster self, Player target, Room room) Action
++name() String
+}
+
+class HealerStrategy {
+<<ConcreteStrategy>>
++chooseAction(Monster self, Player target, Room room) Action
++name() String
+}
+
+class Action {
+<<StrategyResult>>
++Type type
+-Entity target
+-String flavor
++Action(Type type, Entity target, String flavor)
++static wait(String flavor) Action
++getType() Type
++getTarget() Entity
++getFlavor() String
+}
+
+class ActionType {
+<<enumeration>>
+ATTACK
+RANGED_ATTACK
+FLEE
+HEAL_ALLY
+WAIT
+}
+}
+
+
+%% =========================================================
+%% OBSERVER PATTERN
+%% =========================================================
+
+namespace Observer_Pattern {
+
+class GameEventListener {
+<<ObserverInterface>>
++onEvent(GameEvent event) void
+}
+
+class EventBus {
+<<SubjectPublisher>>
+-List~GameEventListener~ listeners
++subscribe(GameEventListener listener) void
++unsubscribe(GameEventListener listener) void
++publish(GameEvent event) void
++message(String text) void
++listenerCount() int
+}
+
+class GameEvent {
+<<Event>>
+-EventType type
+-Map~String,Object~ payload
++GameEvent(EventType type)
++static of(EventType type, Object... keyValuePairs) GameEvent
++static message(String text) GameEvent
++getType() EventType
++get(String key) Object
++getString(String key) String
++getInt(String key) int
++toString() String
+}
+
+class EventType {
+<<enumeration>>
+DAMAGE_DEALT
+DAMAGE_TAKEN
+MONSTER_DIED
+MONSTER_FLED
+MONSTER_HEALED
+STRATEGY_CHANGED
+XP_GAINED
+GOLD_GAINED
+LEVEL_ENTERED
+ROOM_CLEARED
+PLAYER_DIED
+DELVE_SURVIVED
+MESSAGE
+    }
+
+class CombatLog {
+<<ConcreteObserver>>
+-Deque~String~ lines
+-int maxLines
++CombatLog(int maxLines)
++onEvent(GameEvent event) void
+-format(GameEvent event) String
++getLines() Deque~String~
++size() int
+}
+
+class AchievementSystem {
+<<ConcreteObserver>>
+-Set~String~ unlocked
+-EventBus bus
+-int kills
+-int fled
+-int deepestLevel
++AchievementSystem(EventBus bus)
++onEvent(GameEvent event) void
+-unlock(String name, String description) void
++getUnlocked() Set~String~
+}
+
+class QuestTracker {
+<<ConcreteObserver>>
+-List~Quest~ quests
+-EventBus bus
++QuestTracker(EventBus bus)
++onEvent(GameEvent event) void
++getQuests() List~Quest~
++completedCount() int
+}
+
+class Quest {
+-String id
+-String description
+-EventType trigger
+-int required
+-int progress
++Quest(String id, String description, EventType trigger, int required)
++getId() String
++getDescription() String
++getTrigger() EventType
++getRequired() int
++getProgress() int
++isComplete() boolean
++advance() boolean
++toString() String
+}
+}
+
+
+%% =========================================================
+%% SIMPLE FACTORY IDIOM
+%% =========================================================
+
+namespace Simple_Factory {
+
+class MonsterFactory {
+<<SimpleFactory>>
+-Map~String,MonsterDef~ blueprints
++MonsterFactory()
+-loadFrom(String resourceName) void
++register(MonsterDef def) void
++create(String id, int depth) Monster
++idsForTheme(String name) List~String~
++bossIdFromTheme(String theme) String
++has(String id) boolean
++blueprintCount() int
++static strategyFor(String name) CombatStrategy
+-static str(Object o, String fallback) String
+-static num(Object o, int fallback) int
+}
+
+class MonsterDef {
+<<ProductBlueprint>>
++String id
++String name
++int hp
++int attack
++int xp
++String theme
++boolean boss
++String strategy
++MonsterDef(String id, String name, int hp, int attack, int xp, String theme)
++MonsterDef(String id, String name, int hp, int attack, int xp, String theme, boolean boss, String strategy)
++getId() String
++getName() String
++getHp() int
++getAttack() int
++getXp() int
++getTheme() String
++isBoss() boolean
++getStrategy() String
++toString() String
+}
+}
+
+
+%% =========================================================
+%% FACTORY METHOD PATTERN
+%% =========================================================
+
+namespace Factory_Method {
+
+class RoomPopulator {
+<<AbstractCreator>>
+#ThemeKit theme
+#RoomPopulator(ThemeKit theme)
++populate(Room room, int depth) void
+#createEncounter(int depth) List~Monster~
+#createChest(int depth) Chest
++kind() String
+}
+
+class StandardRoomPopulator {
+<<ConcreteCreator>>
++StandardRoomPopulator(ThemeKit theme)
++kind() String
+#createEncounter(int depth) List~Monster~
+}
+
+class TreasureRoomPopulator {
+<<ConcreteCreator>>
++TreasureRoomPopulator(ThemeKit theme)
++kind() String
+#createEncounter(int depth) List~Monster~
+#createChest(int depth) Chest
+}
+
+class BossRoomPopulator {
+<<ConcreteCreator>>
++BossRoomPopulator(ThemeKit theme)
++kind() String
+#createEncounter(int depth) List~Monster~
+#createChest(int depth) Chest
+}
+}
+
+
+%% =========================================================
+%% ABSTRACT FACTORY PATTERN
+%% =========================================================
+
+namespace Abstract_Factory {
+
+class ThemeKit {
+<<AbstractFactory>>
++themeName() String
++createMonster(int depth) Monster
++createBoss(int depth) Monster
++createLoot(int depth) Item
++createRoomFlavor() String
+}
+
+class CryptThemeKit {
+<<ConcreteFactory>>
+-MonsterFactory factory
+-String[] FLAVORS
++CryptThemeKit(MonsterFactory factory)
++themeName() String
++createMonster(int depth) Monster
++createBoss(int depth) Monster
++createLoot(int depth) Item
++createRoomFlavor() String
+}
+
+class ForgeThemeKit {
+<<ConcreteFactory>>
+-MonsterFactory factory
+-String[] FLAVORS
++ForgeThemeKit(MonsterFactory factory)
++themeName() String
++createMonster(int depth) Monster
++createBoss(int depth) Monster
++createLoot(int depth) Item
++createRoomFlavor() String
+}
+
+class FrostThemeKit {
+<<ConcreteFactory>>
+-MonsterFactory factory
+-String[] FLAVORS
++FrostThemeKit(MonsterFactory factory)
++themeName() String
++createMonster(int depth) Monster
++createBoss(int depth) Monster
++createLoot(int depth) Item
++createRoomFlavor() String
+}
+
+class WinterfellThemeKit {
+<<ConcreteFactory>>
+-MonsterFactory factory
+-String[] FLAVORS
++WinterfellThemeKit(MonsterFactory factory)
++themeName() String
++createMonster(int depth) Monster
++createBoss(int depth) Monster
++createLoot(int depth) Item
++createRoomFlavor() String
+}
+
+class ThemeRegistry {
+<<FactoryRegistry>>
+-List~ThemeKit~ kits
++ThemeRegistry(MonsterFactory factory)
++forDepth(int depth) ThemeKit
++size() int
++themeNames() List~String~
+}
+}
+
+
+%% =========================================================
+%% CORE GAME DOMAIN
+%% =========================================================
+
+namespace Core_Game {
+
+class Entity {
+<<abstract>>
+#String name
+#int hp
+#int maxHp
+#int attackPower
+#int defense
+#Entity(String name, int maxHp, int attackPower, int defense)
++getName() String
++getHp() int
++getMaxHp() int
++getAttackPower() int
++getDefense() int
++isAlive() boolean
++takeDamage(int amount) void
++heal(int amount) void
++describe() String
++toString() String
+}
+
+class Player {
+-int gold
+-int xp
++Player(String name)
++getGold() int
++getXp() int
++addGold(int g) void
++addXp(int x) void
++carryCapacity() double
++describe() String
+}
+
+class Monster {
+-String species
+-int xpReward
+-CombatStrategy strategy
++Monster(String species, int maxHp, int attackPower, int xpReward)
++getSpecies() String
++getXpReward() int
++getStrategy() CombatStrategy
++setStrategy(CombatStrategy strategy) void
++hpFraction() double
++describe() String
+}
+
+class Room {
+-String id
+-String flavor
+-List~Monster~ monsters
+-List~Item~ floorItems
+-Chest chest
++Room(String id)
++getId() String
++getFlavor() String
++setFlavor(String f) void
++getMonsters() List~Monster~
++addMonster(Monster m) void
++getFloorItems() List~Item~
++addItem(Item i) void
++getChest() Chest
++setChest(Chest c) void
++hasChest() boolean
+}
+
+class DungeonLevel {
+-int depth
+-String themeName
+-List~Room~ rooms
++DungeonLevel(int depth, String themeName)
++getDepth() int
++getThemeName() String
++getRooms() List~Room~
++addRoom(Room r) void
+}
+
+class GameWorld {
+-Player player
+-MonsterFactory monsterFactory
+-ThemeRegistry themes
+-List~DungeonLevel~ levels
++GameWorld(Player player)
+-generate() void
+-populatorFor(ThemeKit theme, boolean isFinalRoom) RoomPopulator
++getPlayer() Player
++getLevels() List~DungeonLevel~
++getMonsterFactory() MonsterFactory
++getThemes() ThemeRegistry
++totalMonsters() int
++totalLoot() int
+}
+
+class Combat {
+-EventBus bus
+-static int MAX_ROUNDS
++Combat(EventBus bus)
++fight(Player player, Room room, int depth) boolean
+-playerActs(Player player, Room room) void
+-checkForTacticsChange(Monster m) void
+-monsterActs(Monster m, Player player, Room room) void
+-hasLiving(Room room) boolean
+-firstLiving(Room room) Monster
+-livingMonsters(Room room) List~Monster~
++static restAfterRoom(Player player) void
+}
+}
+
+
+%% =========================================================
+%% ITEM / ABSTRACT FACTORY PRODUCTS
+%% =========================================================
+
+namespace Items {
+
+class Item {
+<<interface>>
++getName() String
++getWeight() double
++getValue() int
++describe() String
+}
+
+class Weapon {
+-String name
+-double weight
+-int value
+-int damage
++Weapon(String name, double weight, int value, int damage)
++getName() String
++getWeight() double
++getValue() int
++getDamage() int
++describe() String
+}
+
+class Armor {
+-String name
+-double weight
+-int value
+-int defense
++Armor(String name, double weight, int value, int defense)
++getName() String
++getWeight() double
++getValue() int
++getDefense() int
++describe() String
+}
+
+class Potion {
+-String name
+-double weight
+-int value
+-int healAmount
++Potion(String name, double weight, int value, int healAmount)
++getName() String
++getWeight() double
++getValue() int
++getHealAmount() int
++describe() String
+}
+
+class Treasure {
+-String name
+-double weight
+-int value
++Treasure(String name, double weight, int value)
++getName() String
++getWeight() double
++getValue() int
+}
+
+class Chest {
+-String name
+-List~Item~ contents
++Chest(String name)
++getName() String
++getContents() List~Item~
++add(Item item) void
++isEmpty() boolean
++totalValue() int
+}
+}
+
+
+%% =========================================================
+%% APPLICATION ENTRY POINT
+%% =========================================================
+
+namespace Application {
+
+class Main {
+<<entrypoint>>
++static String VERSION
+-Main()
++static banner() String
++static main(String[] args) void
+-static delve(GameWorld world, Player player, EventBus bus) void
+}
+}
+
+
+%% =========================================================
+%% INHERITANCE / INTERFACE IMPLEMENTATION
+%% =========================================================
+
+Entity <|-- Player
+Entity <|-- Monster
+
+CombatStrategy <|.. AggressiveStrategy
+CombatStrategy <|.. RangedStrategy
+CombatStrategy <|.. SkittishStrategy
+CombatStrategy <|.. HealerStrategy
+
+GameEventListener <|.. CombatLog
+GameEventListener <|.. AchievementSystem
+GameEventListener <|.. QuestTracker
+
+RoomPopulator <|-- StandardRoomPopulator
+RoomPopulator <|-- TreasureRoomPopulator
+RoomPopulator <|-- BossRoomPopulator
+
+ThemeKit <|.. CryptThemeKit
+ThemeKit <|.. ForgeThemeKit
+ThemeKit <|.. FrostThemeKit
+ThemeKit <|.. WinterfellThemeKit
+
+Item <|.. Weapon
+Item <|.. Armor
+Item <|.. Potion
+Item <|.. Treasure
+
+
+%% =========================================================
+%% SINGLETON RELATIONSHIPS
+%% =========================================================
+
+RandomSource ..> GameConfig : gets seed from
+GameConfig ..> Json : parses config
+MonsterFactory ..> GameConfig : reads resources
+MonsterFactory ..> RandomSource : seeded variance
+Player ..> GameConfig : player settings
+Combat ..> GameConfig : flee/rest settings
+StandardRoomPopulator ..> GameConfig : max monsters
+
+RangedStrategy ..> RandomSource : random choice
+SkittishStrategy ..> GameConfig : flee threshold
+
+
+%% =========================================================
+%% STRATEGY RELATIONSHIPS
+%% =========================================================
+
+Monster --> "0..1" CombatStrategy : current strategy
+
+CombatStrategy ..> Action : creates
+CombatStrategy ..> Monster : self
+CombatStrategy ..> Player : target
+CombatStrategy ..> Room : context
+
+Action --> ActionType : type
+Action --> "0..1" Entity : target
+
+MonsterFactory ..> CombatStrategy : selects strategy
+MonsterFactory ..> AggressiveStrategy : creates
+MonsterFactory ..> RangedStrategy : creates
+MonsterFactory ..> SkittishStrategy : creates
+MonsterFactory ..> HealerStrategy : creates
+
+Combat ..> CombatStrategy : executes
+Combat ..> Action : resolves
+Combat ..> SkittishStrategy : switches tactics
+
+
+%% =========================================================
+%% OBSERVER RELATIONSHIPS
+%% =========================================================
+
+EventBus o-- GameEventListener : subscribers
+EventBus ..> GameEvent : publishes
+
+GameEvent --> EventType : event type
+
+QuestTracker *-- "1..*" Quest : tracks
+Quest --> EventType : trigger
+
+QuestTracker --> EventBus : sends messages
+AchievementSystem --> EventBus : sends messages
+
+Combat --> EventBus : publishes events
+Combat ..> GameEvent : creates
+Combat ..> EventType : selects event
+
+Main --> EventBus : creates / wires
+Main --> QuestTracker : subscribes
+Main --> AchievementSystem : subscribes
+Main --> CombatLog : subscribes
+
+
+%% =========================================================
+%% SIMPLE FACTORY RELATIONSHIPS
+%% =========================================================
+
+MonsterFactory *-- "0..*" MonsterDef : blueprints
+MonsterFactory ..> Monster : creates
+MonsterFactory ..> Json : loads JSON
+
+CryptThemeKit --> MonsterFactory : delegates monster creation
+ForgeThemeKit --> MonsterFactory : delegates monster creation
+FrostThemeKit --> MonsterFactory : delegates monster creation
+WinterfellThemeKit --> MonsterFactory : delegates monster creation
+
+
+%% =========================================================
+%% ABSTRACT FACTORY RELATIONSHIPS
+%% =========================================================
+
+ThemeKit ..> Monster : creates family product
+ThemeKit ..> Item : creates family product
+
+ThemeRegistry *-- "1..*" ThemeKit : registered themes
+ThemeRegistry ..> CryptThemeKit : registers
+ThemeRegistry ..> ForgeThemeKit : registers
+ThemeRegistry ..> FrostThemeKit : registers
+ThemeRegistry ..> WinterfellThemeKit : registers
+
+CryptThemeKit ..> RandomSource
+ForgeThemeKit ..> RandomSource
+FrostThemeKit ..> RandomSource
+WinterfellThemeKit ..> RandomSource
+
+CryptThemeKit ..> Weapon : creates
+CryptThemeKit ..> Armor : creates
+CryptThemeKit ..> Potion : creates
+CryptThemeKit ..> Treasure : creates
+
+ForgeThemeKit ..> Weapon : creates
+ForgeThemeKit ..> Armor : creates
+ForgeThemeKit ..> Potion : creates
+ForgeThemeKit ..> Treasure : creates
+
+FrostThemeKit ..> Weapon : creates
+FrostThemeKit ..> Armor : creates
+FrostThemeKit ..> Potion : creates
+FrostThemeKit ..> Treasure : creates
+
+WinterfellThemeKit ..> Weapon : creates
+WinterfellThemeKit ..> Armor : creates
+WinterfellThemeKit ..> Potion : creates
+WinterfellThemeKit ..> Treasure : creates
+
+
+%% =========================================================
+%% FACTORY METHOD RELATIONSHIPS
+%% =========================================================
+
+RoomPopulator --> ThemeKit : has-a
+RoomPopulator ..> Room : populates
+RoomPopulator ..> Monster : factory method product
+RoomPopulator ..> Chest : optional hook product
+
+StandardRoomPopulator ..> RandomSource
+TreasureRoomPopulator ..> RandomSource
+TreasureRoomPopulator ..> Chest : creates
+BossRoomPopulator ..> Chest : creates
+
+
+%% =========================================================
+%% CORE DOMAIN RELATIONSHIPS
+%% =========================================================
+
+GameWorld --> Player : player
+GameWorld *-- "1..*" DungeonLevel : levels
+GameWorld *-- MonsterFactory : owns
+GameWorld *-- ThemeRegistry : owns
+
+GameWorld ..> ThemeKit : chooses theme
+GameWorld ..> RoomPopulator : chooses creator
+GameWorld ..> StandardRoomPopulator : creates
+GameWorld ..> TreasureRoomPopulator : creates
+GameWorld ..> BossRoomPopulator : creates
+GameWorld ..> GameConfig : generation settings
+GameWorld ..> RandomSource : room type choice
+
+DungeonLevel *-- "0..*" Room : rooms
+
+Room *-- "0..*" Monster : monsters
+Room *-- "0..*" Item : floor items
+Room *-- "0..1" Chest : chest
+
+Chest *-- "0..*" Item : contents
+
+Combat --> Player : fights with
+Combat --> Room : resolves
+Combat --> Monster : controls
+
+
+%% =========================================================
+%% MAIN / APPLICATION RELATIONSHIPS
+%% =========================================================
+
+Main ..> GameConfig
+Main ..> RandomSource
+Main ..> Player : creates
+Main ..> GameWorld : creates
+Main ..> DungeonLevel
+Main ..> Room
+Main ..> Monster
+Main ..> Combat : creates
+Main ..> GameEvent : publishes
+Main ..> EventType
+
+
+%% =========================================================
+%% VISUAL PATTERN STYLING
+%% =========================================================
+
+style GameConfig fill:#ffe6cc,stroke:#d79b00,stroke-width:3px
+style RandomSource fill:#ffe6cc,stroke:#d79b00,stroke-width:3px
+
+style MonsterFactory fill:#d5e8d4,stroke:#82b366,stroke-width:3px
+style MonsterDef fill:#d5e8d4,stroke:#82b366,stroke-width:2px
+
+style RoomPopulator fill:#dae8fc,stroke:#6c8ebf,stroke-width:3px
+style StandardRoomPopulator fill:#dae8fc,stroke:#6c8ebf,stroke-width:2px
+style TreasureRoomPopulator fill:#dae8fc,stroke:#6c8ebf,stroke-width:2px
+style BossRoomPopulator fill:#dae8fc,stroke:#6c8ebf,stroke-width:2px
+
+style ThemeKit fill:#e1d5e7,stroke:#9673a6,stroke-width:3px
+style CryptThemeKit fill:#e1d5e7,stroke:#9673a6,stroke-width:2px
+style ForgeThemeKit fill:#e1d5e7,stroke:#9673a6,stroke-width:2px
+style FrostThemeKit fill:#e1d5e7,stroke:#9673a6,stroke-width:2px
+style WinterfellThemeKit fill:#e1d5e7,stroke:#9673a6,stroke-width:2px
+style ThemeRegistry fill:#e1d5e7,stroke:#9673a6,stroke-width:2px
+
+style CombatStrategy fill:#fff2cc,stroke:#d6b656,stroke-width:3px
+style AggressiveStrategy fill:#fff2cc,stroke:#d6b656,stroke-width:2px
+style RangedStrategy fill:#fff2cc,stroke:#d6b656,stroke-width:2px
+style SkittishStrategy fill:#fff2cc,stroke:#d6b656,stroke-width:2px
+style HealerStrategy fill:#fff2cc,stroke:#d6b656,stroke-width:2px
+style Action fill:#fff2cc,stroke:#d6b656,stroke-width:2px
+
+style EventBus fill:#f8cecc,stroke:#b85450,stroke-width:3px
+style GameEventListener fill:#f8cecc,stroke:#b85450,stroke-width:3px
+style GameEvent fill:#f8cecc,stroke:#b85450,stroke-width:2px
+style CombatLog fill:#f8cecc,stroke:#b85450,stroke-width:2px
+style AchievementSystem fill:#f8cecc,stroke:#b85450,stroke-width:2px
+style QuestTracker fill:#f8cecc,stroke:#b85450,stroke-width:2px
+style Quest fill:#f8cecc,stroke:#b85450,stroke-width:2px
+
+style Monster fill:#fff2cc,stroke:#d6b656,stroke-width:3px
