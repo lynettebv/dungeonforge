@@ -14,9 +14,9 @@
 
 | Sprint | Committed | Completed |
 |---|---|---|
-| Sprint 0 (Week 2) | 7 | ____ |
-| Sprint 1 (Week 3) | 8 | ____ |
-| Sprint 2 (Week 4) | 10 | ____ |
+| Sprint 0 (Week 2) | 7 | __7__ |
+| Sprint 1 (Week 3) | 8 | __4__ |
+| Sprint 2 (Week 4) | 10 | __10__ |
 
 Three data points. If your completed column reads roughly 7, 8, 9, then **10 points is an
 honest commitment**. If it reads 7, 5, 6, then this sprint is over-committed *for you* and the
@@ -69,15 +69,16 @@ Noticing that is worth more than finishing everything.
 
 | Story | Estimated | Actual hours | High, low, about right? |
 |---|---|---|---|
-| US-3.1 | 3 | | |
-| US-3.2 | 2 | | |
-| US-3.3 | 3 | | |
-| US-3.4 | 2 | | |
+| US-3.1 | 3 | 4 | low |
+| US-3.2 | 2 | 2 | about right |
+| US-3.3 | 3 | 4 | high |
+| US-3.4 | 2 | 2 | low |
 
-**Points completed:** ____ · **Running velocity (sprints 0–3):** ____
+**Points completed:** __10__ · **Running velocity (sprints 0–3):** __~9__
 
 > **This number is your Week 6 budget.** You'll set your own capacity from it.
 
 ## Sprint Review — one sentence
 
-
+This sprint helped me understand Strategy and Observer better
+because I was able to see both patterns working in the game.

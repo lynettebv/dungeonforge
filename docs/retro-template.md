@@ -12,14 +12,14 @@
 
 ## 2. What slowed me down?
 
-- 
+-
 
 ## 3. ONE thing I will do differently next sprint
 
 > One. Specific. Actionable. "Be more organised" is not actionable.
 > "Write the test before the implementation for at least one story" is.
 
-- 
+-
 
 ---
 
@@ -34,12 +34,12 @@
 
 | Issue | Why it did not finish |
 |---|---|
-| # |  |
+| # | |
 
 ## Last sprint's "one thing" — did I actually do it?
 
 > Look up the previous retro. Be honest. A retro nobody reads is a diary, not a process.
 
-- Last sprint I said I would: 
+- Last sprint I said I would:
 - Did I? ☐ yes ☐ partly ☐ no
 - What I learned from that: 
