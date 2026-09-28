@@ -65,9 +65,9 @@ Filled in as the semester goes. By Week 16 this table is the portfolio piece.
 
 | Week | Pattern | Where it lives | Why it fits |
 |---|---|---|---|
-| 3 | Singleton | | |
-| 4 | Factory Method / Abstract Factory | | |
-| 5 | Strategy / Observer | | |
+| 3 | Singleton | `GameConfig`, `RandomSource` | |
+| 4 | Factory Method / Abstract Factory | `RoomPopulator` | |
+| 5 | Strategy / Observer | `CombatStrategy`, `Monster`/`EventBus` | |
 | 7 | Command | | |
 | 8 | State | | |
 | 9 | Decorator | | |
