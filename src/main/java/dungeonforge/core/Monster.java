@@ -1,6 +1,8 @@
 package dungeonforge.core;
 
 
+import dungeonforge.behavior.CombatStrategy;
+
 /**
  * WEEK 1 -- a monster.
  * WEEK 3 (US-1.2) -- its private Random is gone. Stat variance now comes from the one
@@ -10,6 +12,7 @@ public class Monster extends Entity {
 
     private final String species;
     private final int xpReward;
+    private CombatStrategy strategy;
 
     /**
      * WEEK 5 correction: stat variance used to be rolled here AND again in MonsterFactory,
@@ -25,6 +28,10 @@ public class Monster extends Entity {
 
     public String getSpecies() { return species; }
     public int getXpReward()   { return xpReward; }
+    public CombatStrategy getStrategy() { return strategy; }
+    public void setStrategy(CombatStrategy strategy) { this.strategy = strategy; }
+
+    public double hpFraction() { return maxHp == 0 ? 0 : (double)hp / maxHp; }
 
     @Override
     public String describe() {
