@@ -8,6 +8,10 @@ import dungeonforge.core.GameWorld;
 import dungeonforge.core.Monster;
 import dungeonforge.core.Player;
 import dungeonforge.core.Room;
+import dungeonforge.events.EventBus;
+import dungeonforge.events.EventType;
+import dungeonforge.events.GameEvent;
+import dungeonforge.events.QuestTracker;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
@@ -95,7 +99,11 @@ public final class Main {
             }
             System.out.println();
             System.out.println("=== THE DELVE ===");
-            delve(world, player);
+            EventBus bus = new EventBus();
+            QuestTracker quests = new QuestTracker(bus);
+            bus.subscribe(quests);
+
+            delve(world, player, bus);
 
             System.out.println();
             System.out.println("Themes registered: " + world.getThemes().themeNames());
@@ -108,11 +116,11 @@ public final class Main {
     }
 
     /** Walks the whole dungeon, fighting whatever is in the way. */
-    private static void delve (GameWorld world, Player player){
-        Combat combat = new Combat();
+    private static void delve (GameWorld world, Player player, EventBus bus){
+        Combat combat = new Combat(bus);
         for (DungeonLevel level : world.getLevels()) {
-            System.out.println("  Descending to level " + level.getDepth()
-                    + " (" + level.getThemeName() + ")");
+            bus.publish(GameEvent.of(EventType.LEVEL_ENTERED,
+                    "depth", level.getDepth(), "theme", level.getThemeName()));
             for (Room room : level.getRooms()) {
                 if (!room.getMonsters().isEmpty()) {
                     System.out.println("    " + room.getId());
@@ -121,9 +129,7 @@ public final class Main {
                 Combat.restAfterRoom(player);
             }
         }
-        System.out.println();
-        System.out.println(player.isAlive()
-                ? "  You climb back into daylight. " + player.describe()
-                : "  You die in the dark. XP " + player.getXp() + ", gold " + player.getGold());
+        bus.publish(GameEvent.of(EventType.DELVE_SURVIVED));
+        System.out.println(" " + player.describe());
     }
 }
