@@ -56,11 +56,11 @@ type, or a `DangerMeter` that notices when your HP drops below 25%. Subscribe it
 
 | Question | Your answer |
 |---|---|
-| How many **new** files? | |
-| Did `Combat.java` change? | |
-| Did `EventBus.java` change? | |
-| Did any existing listener change? | |
-| Which files changed at all? | |
+| How many **new** files? | 1 |
+| Did `Combat.java` change? | No |
+| Did `EventBus.java` change? | No |
+| Did any existing listener change? | No |
+| Which files changed at all? | Added 1, changed Main |
 
 **Paste `git diff --stat`:**
 
@@ -81,6 +81,14 @@ you to edit `Combat` and the bus version does not.
 > A good answer names a specific future feature. A great answer names one from this course's
 > remaining schedule.
 
+```
+The direct call would cause Combat to depend directly on QuestTracker.
+This means if we wanted to add another feature later, like a StatisticsCollector
+that keeps track of how many monsters were defeated, we would have to go back
+and change Combat again. With the EventBus, the new StatisticsCollector
+can just subscribe and listen for the events it needs. Combat does not need to change
+because it just publishes what happened and does not care which systems are listening.
+```
 
 ## D3 — The swap, demonstrated · 5 pts
 
@@ -93,17 +101,36 @@ Forge Golem changes tactics: aggressive -> skittish.
 **Paste yours:**
 
 ```
-
+-- strategy highlights --
+  Skeleton changes tactics: aggressive -> skittish
+  Skeleton flees into the dark.
+  Bone Priest mends Wight
+  Wight changes tactics: aggressive -> skittish
+  Wight flees into the dark.
+  Imp changes tactics: ranged -> skittish
+  Imp flees into the dark.
+  Imp changes tactics: ranged -> skittish
+  Imp flees into the dark.
+  Ember Sprite changes tactics: ranged -> skittish
 ```
 
 **Now answer:** at the moment that line was printed, what changed about the `Forge Golem`
 object? Be precise. Its class? Its fields? Its identity? What *specifically* is different
 about it one instruction later?
 
+```
+The monster is still the same object and its class dos not change.
+The part we see change is the strategy field. The monster's behavior
+is what changes. The instructions point to a SkittishStrategy instead of ranged and aggressive.
+```
 
 **Then add a fifth strategy** of your own invention. How many existing files did you have to
 modify, and which?
 
+```
+No existing files needed to be modified. 
+Only one new file needed to be created for the fifth strategy.
+```
 
 ## D4 — One honest question · 3 pts
 
@@ -114,6 +141,11 @@ holds one and delegates to it.
 **Without looking ahead, guess:** what could possibly distinguish them? You are not expected
 to be right. You're expected to have a hypothesis on record before Week 8 tells you.
 
+```
+I can guess that the differences may lie in how changes happen to the object.
+So for Strategy the object can choose between multiple behaviors.
+For State, the object may change because the implementations happen to the object.
+```
 
 **And anything else that's still unclear:**
 
