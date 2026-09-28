@@ -1,5 +1,4 @@
 package dungeonforge;
-
 import dungeonforge.behavior.Action;
 import dungeonforge.behavior.AggressiveStrategy;
 import dungeonforge.behavior.CombatStrategy;
@@ -12,6 +11,11 @@ import dungeonforge.core.Combat;
 import dungeonforge.core.Monster;
 import dungeonforge.core.Player;
 import dungeonforge.core.Room;
+import dungeonforge.events.EventBus;
+import dungeonforge.events.EventType;
+import dungeonforge.events.GameEvent;
+import dungeonforge.events.GameEventListener;
+import dungeonforge.events.QuestTracker;
 import dungeonforge.factory.MonsterFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -111,13 +115,89 @@ class StrategyObserverTest {
     }
     @Test
     void combatSwapsAWoundedMonsterToSkittishAndAnnouncesIt() {
+        EventBus bus = new EventBus();
+        List<GameEvent> seen = new ArrayList<>();
+        bus.subscribe(seen::add);
         Room room = new Room("r");
         Monster m = new Monster("Slag Hound", 25, 3, 5);
         m.setStrategy(new AggressiveStrategy());
         room.addMonster(m);
-        new Combat().fight(new Player("P"), room, 1);
-        assertFalse(m.getStrategy().name() == "aggressive",
+        new Combat(bus).fight(new Player("P"), room, 1);
+        assertTrue(seen.stream().anyMatch(e -> e.getType() ==
+                        EventType.STRATEGY_CHANGED),
                 "a monster driven below the flee threshold should change tactics");
+    }
+    // ---------- US-3.3 and US-3.4: Observer ----------
+    @Test
+    void aSubscriberReceivesWhatIsPublished() {
+        EventBus bus = new EventBus();
+        List<GameEvent> seen = new ArrayList<>();
+        bus.subscribe(seen::add);
+        bus.publish(GameEvent.of(EventType.MONSTER_DIED, "name", "Skeleton", "xp",
+                6));
+        assertEquals(1, seen.size());
+        assertEquals("Skeleton", seen.get(0).getString("name"));
+        assertEquals(6, seen.get(0).getInt("xp"));
+    }
+    @Test
+    void everySubscriberSeesEveryEvent() {
+        EventBus bus = new EventBus();
+        List<GameEvent> a = new ArrayList<>();
+        List<GameEvent> b = new ArrayList<>();
+        bus.subscribe(a::add);
+        bus.subscribe(b::add);
+        bus.publish(GameEvent.of(EventType.ROOM_CLEARED, "room", "L1R1"));
+        assertEquals(1, a.size());
+        assertEquals(1, b.size());
+    }
+    @Test
+    void unsubscribingStopsDelivery() {
+        EventBus bus = new EventBus();
+        List<GameEvent> seen = new ArrayList<>();
+        GameEventListener l = seen::add;
+        bus.subscribe(l);
+        bus.publish(GameEvent.message("one"));
+        bus.unsubscribe(l);
+        bus.publish(GameEvent.message("two"));
+        assertEquals(1, seen.size());
+    }
+    /** A listener that removes itself mid-notification must not blow up the bus.
+     */
+    @Test
+    void aListenerMayUnsubscribeItselfWhileBeingNotified() {
+        EventBus bus = new EventBus();
+        GameEventListener[] holder = new GameEventListener[1];
+        holder[0] = e -> bus.unsubscribe(holder[0]);
+        bus.subscribe(holder[0]);
+        assertDoesNotThrow(() -> bus.publish(GameEvent.message("boom")));
+        assertEquals(0, bus.listenerCount());
+    }
+    @Test
+    void theQuestTrackerCountsWithoutCombatKnowingItExists() {
+        EventBus bus = new EventBus();
+        QuestTracker tracker = new QuestTracker(bus);
+        bus.subscribe(tracker);
+        for (int i = 0; i < 5; i++) {
+            bus.publish(GameEvent.of(EventType.MONSTER_DIED, "name", "Skeleton",
+                    "xp", 6));
+        }
+        assertTrue(tracker.getQuests().get(0).isComplete());
+    }
+    /**
+     * THE GRADED PROOF of US-3.4: Combat publishes and has no reference to any
+     listener.
+     * If this fails, someone reached into Combat to add a feature that should have
+     subscribed.
+     */
+    @Test
+    void combatDoesNotDependOnAnyListener() throws Exception {
+        String source = new String(java.nio.file.Files.readAllBytes(
+                java.nio.file.Path.of("src/main/java/dungeonforge/core/Combat.java")));
+        assertFalse(source.contains("QuestTracker"));
+        assertFalse(source.contains("AchievementSystem"));
+        assertFalse(source.contains("CombatLog"));
+        assertFalse(source.contains("System.out"),
+                "Combat must not print -- it publishes, and a view decides what to show");
     }
     // ---------- regression ----------
     @Test
