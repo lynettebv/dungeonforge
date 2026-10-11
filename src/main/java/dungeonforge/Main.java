@@ -1,29 +1,59 @@
 package dungeonforge;
 
-import dungeonforge.config.GameConfig;
-import dungeonforge.config.RandomSource;
+import dungeonforge.commands.Command;
+import dungeonforge.commands.CommandParser;
+import dungeonforge.commands.GameContext;
 import dungeonforge.core.Combat;
 import dungeonforge.core.DungeonLevel;
 import dungeonforge.core.GameWorld;
 import dungeonforge.core.Monster;
 import dungeonforge.core.Player;
 import dungeonforge.core.Room;
-import dungeonforge.events.*;
+import dungeonforge.config.RandomSource;
+import dungeonforge.events.AchievementSystem;
+import dungeonforge.events.CombatLog;
+import dungeonforge.events.DangerMeter;
+import dungeonforge.events.EventBus;
+import dungeonforge.events.EventType;
+import dungeonforge.events.GameEvent;
+import dungeonforge.events.GameEventListener;
+import dungeonforge.events.Quest;
+import dungeonforge.events.QuestTracker;
+import dungeonforge.items.Item;
+import dungeonforge.items.Potion;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 
-import java.util.Iterator;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 
 /**
- * WEEK 3 -- the same demo, now reproducible.
- * The --seed flag works because there is exactly one RandomSource to reseed. With three
- * scattered Random objects it could not have been written at all.
+ * WEEK 7 -- the game is now INTERACTIVE. You type; things happen.
+ *
+ * ======================= THE PROBLEM, ALL IN ONE METHOD =======================
+ * Look at gameLoop() below. It is an if/else chain and it is already unpleasant at eleven
+ * verbs. Ask yourself, honestly, before you read the stories:
+ *
+ *   1. Where would you add "equip"?  And "save"?  This method grows forever.
+ *   2. How would you add an ALIAS, so that "n" means "north"? Another condition on every
+ *      branch that needs one.
+ *   3. How would you add UNDO? Stop and actually think about this one. There is nowhere to
+ *      put it, because nothing in this design REMEMBERS what just happened. The action was
+ *      an if-branch, and an if-branch is not a thing you can keep.
+ *   4. How would you record a session and replay it for a bug report? Same answer: there is
+ *      nothing to record.
+ *
+ * Question 3 is the one that matters. Everything else is inconvenience; that one is
+ * impossible. Write your answers in docs/evidence.md before you start.
+ * =============================================================================
  */
 public final class Main {
 
-    public static final String VERSION = "0.5.0";
+    public static final String VERSION = "0.6.0";
 
     private Main() { }
 
@@ -36,155 +66,106 @@ public final class Main {
     }
 
     public static void main(String[] args) {
-        System.out.println(banner());
-        System.out.println("  version " + VERSION);
-        System.out.println("  seed " + RandomSource.getInstance().getSeed()
-                + "  |  depth " + GameConfig.getInstance().getInt("dungeonDepth"));
-        System.out.println();
-
-        ArgumentParser parser = ArgumentParsers.newFor("Main").build()
+        ArgumentParser parser = ArgumentParsers.newFor("dungeonforge").build()
                 .defaultHelp(true)
-                .description("Configure game player details and world seed value.");
+                .description("A turn-based dungeon crawler built one design pattern at a time.");
 
-        // Positional argument: Player name (String)
         parser.addArgument("-n", "--playerName")
-                .dest("playerName")
-                .type(String.class)
-                .setDefault("Delver")
+                .dest("playerName").type(String.class).setDefault("Delver")
                 .help("The name of the player");
-
-        // Optional argument: seed (long)
         parser.addArgument("-s", "--seed")
-                .dest("seed")
-                .type(Long.class)
-                .setDefault(-1L)
-                .help("The name of the player");
+                .dest("seed").type(Long.class).setDefault(-1L)
+                .help("World seed; omit to use the value in config.json");
 
         try {
-            // Parse the arguments
             Namespace res = parser.parseArgs(args);
-            // Extract the argument values
 
             Long seed = res.getLong("seed");
-            if (seed >= 0) {
-                RandomSource.getInstance().reseed(seed);
-            }
+            if (seed != null && seed >= 0) RandomSource.getInstance().reseed(seed);
+
+            System.out.println(banner());
+            System.out.println("  version " + VERSION + "   seed " + RandomSource.getInstance().getSeed());
+            System.out.println();
+
             Player player = new Player(res.getString("playerName"));
+            player.addItem(new Potion("Small Healing Draught", 0.3, 20, 22));
             GameWorld world = new GameWorld(player);
 
-            System.out.println(player.describe());
-            System.out.println();
-
-            for (DungeonLevel level : world.getLevels()) {
-                System.out.println("-- Level " + level.getDepth() + ": " + level.getThemeName() + " --");
-                for (Room room : level.getRooms()) {
-                    StringBuilder line = new StringBuilder("  " + room.getId() + ": ");
-                    if (room.getMonsters().isEmpty()) {
-                        line.append("(empty)");
-                    } else {
-                        for (Monster m : room.getMonsters()) line.append(m.describe()).append("  ");
-                    }
-                    if (room.hasChest()) {
-                        line.append(" [").append(room.getChest().getName()).append(": ");
-                        for (var item : room.getChest().getContents()) line.append(item.getName()).append(", ");
-                        line.setLength(line.length() - 2);
-                        line.append("]");
-                    }
-                    System.out.println(line.toString().trim());
-                    if (!room.getFlavor().isEmpty() && room.getMonsters().isEmpty() && !room.hasChest()) {
-                        System.out.println("        \"" + room.getFlavor() + "\"");
-                    }
-                }
-            }
-            System.out.println();
-            int monstersAtStart = world.totalMonsters();
-            int lootAtStart = world.totalLoot();
-
-            System.out.println("=== THE DELVE ===");
-
-            // WEEK 5 -- Observer wiring. This is the ONLY place the listeners are named.
-            // Combat has no idea any of them exist.
             EventBus bus = new EventBus();
             QuestTracker quests = new QuestTracker(bus);
             AchievementSystem achievements = new AchievementSystem(bus);
             CombatLog log = new CombatLog(200);
+            DangerMeter meter = new DangerMeter(bus, player, 0.25);
             bus.subscribe(quests);
             bus.subscribe(achievements);
             bus.subscribe(log);
+            bus.subscribe(meter);
+            bus.subscribe(new ConsolePrinter());
 
-            delve(world, player, bus);
+            GameContext ctx = new GameContext(world, player, bus, new Combat(bus));
+            CommandParser cmds = new CommandParser(quests, achievements);
 
-            var lines = log.getLines();
+            gameLoop(cmds, ctx);
 
-            System.out.println();
-            System.out.println("-- combat log: opening --");
-            Iterator<String> it = lines.iterator();
-            int i = 0;
-            while(i < 8 && it.hasNext()) {
-                System.out.println("  " + it.next());
-                i++;
-            }
-
-            // The lines that prove the STRATEGY pattern is doing something. Each of these is a
-            // monster behaving differently from another monster, or from its own earlier self.
-            System.out.println();
-            System.out.println("-- strategy highlights --");
-            int shown = 0;
-            for (String line : lines) {
-                if (line.contains("changes tactics") || line.contains("flees")
-                || line.contains("mends") || line.contains("circles")) {
-                    System.out.println("  " + line);
-                    if(++shown >= 10) break;
-                }
-            }
-            if (shown == 0) System.out.println("   (none this seed -- try --seed=3)");
-
-            System.out.println();
-            System.out.println("-- combat log: ending --");
-            lines.stream()
-                    .skip(Math.max(0, lines.size() - 6))
-                    .forEach((line) -> {
-                        System.out.println("  " + line);
-                    });
-
-            System.out.println();
-            System.out.println("-- quests --");
-            for (Quest q : quests.getQuests()) System.out.println("  " + q);
-
-            System.out.println();
-            System.out.println("-- achievements --");
-            if (achievements.getUnlocked().isEmpty()) System.out.println("  (none)");
-            for (String a : achievements.getUnlocked()) System.out.println("  " + a);
-
-            System.out.println();
-            System.out.println("Listeners on the bus: " + bus.listenerCount()
-                    + "  |  log lines captured:  " + log.size());
-
-            System.out.println();
-            System.out.println("Themes registered: " + world.getThemes().themeNames());
-            System.out.println("Monster blueprints loaded: " + world.getMonsterFactory().blueprintCount());
-            System.out.println("Total monsters: " + world.totalMonsters() + "   Total loot: " + world.totalLoot());
         } catch (ArgumentParserException e) {
             parser.handleError(e);
             System.exit(1);
         }
     }
 
-    /** Walks the whole dungeon, fighting whatever is in the way. */
-    private static void delve (GameWorld world, Player player, EventBus bus){
-        Combat combat = new Combat(bus);
-        for (DungeonLevel level : world.getLevels()) {
-            bus.publish(GameEvent.of(EventType.LEVEL_ENTERED,
-                    "depth", level.getDepth(), "theme", level.getThemeName()));
-            for (Room room : level.getRooms()) {
-                if (!combat.fight(player, room, level.getDepth())) {
-                    System.out.println("  " + player.describe());
-                    return;
-                }
-                Combat.restAfterRoom(player);
+    /**
+     * TODO(week 7): eleven verbs, one method, and no way to take anything back.
+     */
+    private static void gameLoop(CommandParser parser, GameContext ctx) {
+
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
+
+        while (ctx.isRunning() && ctx.getPlayer().isAlive()) {
+            System.out.print("\n\n[HP " + ctx.getPlayer().getHp() + "/" + ctx.getPlayer().getMaxHp() + "] > ");
+            System.out.flush();
+
+            String line;
+            try { line = in.readLine(); } catch (Exception e) { break; }
+            if (line == null) break;
+            System.out.println();
+
+            Command command = parser.parse(line,ctx);
+            command.execute();
+        }
+    }
+
+    private static String describe(GameWorld world, Room room) {
+        DungeonLevel level = world.levelContaining(room);
+        StringBuilder b = new StringBuilder();
+        b.append("[").append(room.getId()).append("] Level ").append(level.getDepth())
+         .append(": ").append(level.getThemeName());
+        if (!room.getFlavor().isEmpty()) b.append("\n  \"").append(room.getFlavor()).append("\"");
+        if (room.hasLivingMonsters()) {
+            b.append("\n  Hostile:");
+            for (Monster m : room.getMonsters()) if (m.isAlive()) b.append(" ").append(m.describe());
+        }
+        for (Item i : room.getFloorItems()) b.append("\n  On the floor: ").append(i.describe());
+        if (room.getChest() != null && !room.getChest().getContents().isEmpty()) {
+            b.append("\n  ").append(room.getChest().getName()).append(":");
+            for (Item i : room.getChest().getContents()) b.append("\n    - ").append(i.describe());
+        }
+        b.append("\n  Exits: ").append(String.join(", ", room.getExits().keySet()));
+        return b.toString();
+    }
+
+    /** The console view. It prints; nothing else does. */
+    private static final class ConsolePrinter implements GameEventListener {
+        private final CombatLog formatter = new CombatLog(1);
+
+        @Override
+        public void onEvent(GameEvent event) {
+            if (event.getType() == EventType.ROOM_CLEARED) return;
+            formatter.onEvent(event);
+            var lines = new ArrayList<>(formatter.getLines());
+            if (!lines.isEmpty()) {
+                System.out.println("  " + lines.get(lines.size() - 1));
+                formatter.clear();
             }
         }
-        bus.publish(GameEvent.of(EventType.DELVE_SURVIVED));
-        System.out.println(" " + player.describe());
     }
 }

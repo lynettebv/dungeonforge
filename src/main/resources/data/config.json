@@ -11,5 +11,8 @@
   "restHealPerRoom": 8,
   "fleeThreshold": 0.30,
 
+  "undoDepth": 25,
+
   "seed": 20260829
 }
+
