@@ -1,6 +1,7 @@
 package dungeonforge;
 
 import dungeonforge.commands.Command;
+import dungeonforge.commands.CommandHistory;
 import dungeonforge.commands.CommandParser;
 import dungeonforge.commands.GameContext;
 import dungeonforge.core.Combat;
@@ -102,7 +103,8 @@ public final class Main {
             bus.subscribe(meter);
             bus.subscribe(new ConsolePrinter());
 
-            GameContext ctx = new GameContext(world, player, bus, new Combat(bus));
+            CommandHistory history = new CommandHistory();
+            GameContext ctx = new GameContext(world, player, bus, new Combat(bus), history);
             CommandParser cmds = new CommandParser(quests, achievements);
 
             gameLoop(cmds, ctx);

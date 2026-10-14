@@ -82,17 +82,17 @@ register("drop", DropCommand::new);
 
 | | HP | XP | Gold | Monster HP |
 |---|---|---|---|---|
-| Before attack | | | | |
-| After attack | | | | |
-| After naive undo | | | | |
+| Before attack | 60 | 20 | 30 | 10 |
+| After attack | 60 | 26 | 30 | 0 |
+| After naive undo | 60 | 26 | 30 | 10 |
 
 **The same table after `TurnSnapshot`:**
 
 | | HP | XP | Gold | Monster HP |
 |---|---|---|---|---|
-| Before attack | | | | |
-| After attack | | | | |
-| After snapshot undo | | | | |
+| Before attack | 60 | 20 | 30 | 10 |
+| After attack | 60 | 26 | 30 | 0 |
+| After snapshot undo | 60 | 20 | 30 | 10 |
 
 ## 4. AFTER — US-5.3 and US-5.4
 

@@ -1,6 +1,7 @@
 package dungeonforge;
 
 import dungeonforge.commands.Command;
+import dungeonforge.commands.CommandHistory;
 import dungeonforge.commands.CommandParser;
 import dungeonforge.commands.GameContext;
 import dungeonforge.commands.NoCommand;
@@ -8,6 +9,7 @@ import dungeonforge.config.GameConfig;
 import dungeonforge.config.RandomSource;
 import dungeonforge.core.Combat;
 import dungeonforge.core.GameWorld;
+import dungeonforge.core.Monster;
 import dungeonforge.core.Player;
 import dungeonforge.core.Room;
 import dungeonforge.events.AchievementSystem;
@@ -23,6 +25,7 @@ class CommandTest {
 
     private GameContext ctx;
     private CommandParser parser;
+    private CommandHistory history;
     private Player player;
 
     @BeforeEach
@@ -35,13 +38,15 @@ class CommandTest {
         EventBus bus = new EventBus();
         QuestTracker quests = new QuestTracker(bus);
         AchievementSystem achievements = new AchievementSystem(bus);
-        ctx = new GameContext(world, player, bus, new Combat(bus));
+        history = new CommandHistory();
+        ctx = new GameContext(world, player, bus, new Combat(bus), history);
         parser = new CommandParser(quests, achievements);
     }
 
     private void run(String input) {
         Command c = parser.parse(input, ctx);
         c.execute();
+        history.push(c);
     }
 
     // ---------- US-5.1: every action is an object ----------
@@ -76,10 +81,99 @@ class CommandTest {
     }
 
     @Test
+    void aRefusedCommandDoesNotGoOnTheUndoStack() {
+        int before = history.depth();
+        run("south");                       // no exit south from the first room
+        assertEquals(before, history.depth(),
+                "a command that could not run must not be undoable");
+    }
+
+    @Test
     void readOnlyCommandsAreNeverUndoable() {
         assertFalse(parser.parse("look", ctx).isUndoable());
         assertFalse(parser.parse("inventory", ctx).isUndoable());
         assertFalse(parser.parse("help", ctx).isUndoable());
+    }
+
+    // ---------- US-5.2: undo ----------
+
+    @Test
+    void undoRestoresThePreviousRoom() {
+        Room start = ctx.getCurrentRoom();
+        run("north");
+        assertNotSame(start, ctx.getCurrentRoom());
+
+        assertTrue(history.undoLast());
+        assertSame(start, ctx.getCurrentRoom());
+    }
+
+    /**
+     * THE POINT OF PART D2: undoing an attack must also undo the monsters' reply.
+     * Remembering only the target's hit points would leave the player's damage in place.
+     */
+    @Test
+    void undoingAnAttackAlsoReversesTheCounterAttack() {
+        Room room = ctx.getCurrentRoom();
+        Monster m = new Monster("Test Dummy", 40, 6, 9);
+        m.setStrategy(new dungeonforge.behavior.AggressiveStrategy());
+        room.getMonsters().add(m);
+
+        int hpBefore = player.getHp();
+        int monsterHpBefore = m.getHp();
+
+        run("attack");
+
+        assertTrue(player.getHp() < hpBefore, "the monster should have hit back");
+        assertTrue(m.getHp() < monsterHpBefore);
+
+        assertTrue(history.undoLast());
+
+        assertEquals(hpBefore, player.getHp(), "undo must reverse the counter-attack too");
+        assertEquals(monsterHpBefore, m.getHp());
+    }
+
+    @Test
+    void undoRestoresXpAndGoldFromAKill() {
+        Room room = ctx.getCurrentRoom();
+        Monster weak = new Monster("Fragile", 5, 1, 20);
+        weak.setStrategy(new dungeonforge.behavior.AggressiveStrategy());
+        room.getMonsters().add(weak);
+
+        run("attack");
+        assertTrue(player.getXp() > 0);
+        assertTrue(player.getGold() > 0);
+
+        history.undoLast();
+
+        assertEquals(0, player.getXp());
+        assertEquals(0, player.getGold());
+        assertTrue(weak.isAlive(), "the dead should get back up when time reverses");
+    }
+
+    @Test
+    void undoOnAnEmptyStackReportsFailureRatherThanThrowing() {
+        assertFalse(history.undoLast());
+    }
+
+    @Test
+    void theUndoStackIsBoundedButTheReplayLogIsNot() {
+        for (int i = 0; i < 60; i++) run("look");        // not undoable, but logged
+        assertEquals(0, history.depth());
+        assertEquals(60, history.replayLog().size());
+    }
+
+    // ---------- regression ----------
+
+    @Test
+    void earlierWeeksStillHold() {
+        assertEquals(19, ctx.getWorld().getMonsterFactory().blueprintCount(), "Week 4");
+        assertEquals("Crypt", ctx.getWorld().getLevels().get(0).getThemeName(), "Week 4 themes");
+
+        RandomSource.getInstance().reseed(5L);
+        int a = new GameWorld(new Player("A")).totalMonsters();
+        RandomSource.getInstance().reseed(5L);
+        int b = new GameWorld(new Player("B")).totalMonsters();
+        assertEquals(a, b, "Week 3 determinism");
     }
 
     // ---------- helpers ----------
