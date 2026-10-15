@@ -96,6 +96,23 @@ register("drop", DropCommand::new);
 
 ## 4. AFTER — US-5.3 and US-5.4
 
+**Explain why we had to do this**
+```java
+ @Override
+    public void undo() {
+        for (int i = children.size() - 1; i >= 0; i--) {
+            children.get(i).undo();
+        }
+    }
+```
+```java
+We have to undo the children backwards instead of forwards because
+the last command executed needs to be the first thing to be undone. This ensures each comman is reversed
+in the right order so we can then return it to the original state we are
+trying to get back to.
+```
+
+
 **Paste a `loot` that picks up three things, then an `undo` that puts them all back:**
 
 ```
@@ -108,7 +125,7 @@ register("drop", DropCommand::new);
 
 ```
 
-**How long did US-5.4 actually take you?** ____ minutes
+**How long did US-5.4 actually take you?** __~25__ minutes
 
 ## 5. The replay
 

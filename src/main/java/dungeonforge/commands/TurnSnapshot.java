@@ -32,7 +32,7 @@ public class TurnSnapshot {
         this.hp = player.getHp();
         this.xp = player.getXp();
         this.gold = player.getGold();
-        this.inventory = player.getInventory();
+        this.inventory = new ArrayList<>(player.getInventory());
 
         this.monsters = new ArrayList<>(room.getMonsters());
         this.floorItems = new ArrayList<>(room.getFloorItems());

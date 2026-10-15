@@ -75,6 +75,8 @@ public class CommandParser {
         register("look", (GameContext c, String a) -> new SimpleCommand("look",
                 () -> c.getBus().message(describeRoom(c))));
 
+        register("loot", (c, a) -> makeLootMacro(c));
+
         register("inventory", (GameContext c, String a) -> new SimpleCommand("inventory",
                 () -> {
             if (c.getPlayer().getInventory().isEmpty()) {
@@ -109,6 +111,22 @@ public class CommandParser {
             c.stop();
         }));
         alias("exit", "quit");
+    }
+
+    public Command makeLootMacro(GameContext ctx) {
+        Room room = ctx.getCurrentRoom();
+        List<Item> targets = new ArrayList<>(room.getFloorItems());
+        if(room.getChest() != null && !room.getChest().getContents().isEmpty()) targets.addAll(room.getChest().getContents());
+
+        if (targets.isEmpty()) {
+            return new NoCommand(ctx.getBus(), "There is nothing here to loot!");
+        }
+
+        List<Command> children = new ArrayList<>();
+        for (Item item : targets) {
+            children.add(new TakeCommand(ctx, item.getName()));
+        }
+        return new MacroCommand("loot "+ children.size(), children);
     }
 
     public String describeRoom(GameContext ctx) {

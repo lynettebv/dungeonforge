@@ -4,6 +4,7 @@ import dungeonforge.commands.Command;
 import dungeonforge.commands.CommandHistory;
 import dungeonforge.commands.CommandParser;
 import dungeonforge.commands.GameContext;
+import dungeonforge.commands.MacroCommand;
 import dungeonforge.commands.NoCommand;
 import dungeonforge.config.GameConfig;
 import dungeonforge.config.RandomSource;
@@ -15,6 +16,8 @@ import dungeonforge.core.Room;
 import dungeonforge.events.AchievementSystem;
 import dungeonforge.events.EventBus;
 import dungeonforge.events.QuestTracker;
+import dungeonforge.items.Hourglass;
+import dungeonforge.items.Potion;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -160,6 +163,88 @@ class CommandTest {
         for (int i = 0; i < 60; i++) run("look");        // not undoable, but logged
         assertEquals(0, history.depth());
         assertEquals(60, history.replayLog().size());
+    }
+
+    // ---------- US-5.3: macro ----------
+
+    @Test
+    void lootBecomesOneMacroHoldingSeveralCommands() {
+        Room room = findRoomWithLoot();
+        assumeRoom(room);
+        ctx.setCurrentRoom(room);
+        room.getMonsters().clear();
+
+        Command loot = parser.parse("loot", ctx);
+        assertInstanceOf(MacroCommand.class, loot);
+        assertTrue(((MacroCommand) loot).size() >= 2);
+    }
+
+    @Test
+    void aMacroPicksUpEverythingAndUndoPutsItAllBack() {
+        Room room = findRoomWithLoot();
+        assumeRoom(room);
+        ctx.setCurrentRoom(room);
+        room.getMonsters().clear();
+
+        int expected = room.getChest().getContents().size() + room.getFloorItems().size();
+        run("loot");
+        assertEquals(expected, player.getInventory().size());
+
+        history.undoLast();
+        assertEquals(0, player.getInventory().size(), "undoing a macro undoes all of it");
+    }
+
+    @Test
+    void lootInAnEmptyRoomIsANullObject() {
+        Room bare = new Room("bare");
+        ctx.setCurrentRoom(bare);
+        assertInstanceOf(NoCommand.class, parser.parse("loot", ctx));
+    }
+
+    // ---------- US-5.4: the hourglass ----------
+
+    @Test
+    void theHourglassRewindsTheLastTurn() {
+        player.addItem(new Hourglass(2));
+        Room start = ctx.getCurrentRoom();
+
+        run("north");
+        assertNotSame(start, ctx.getCurrentRoom());
+
+        run("use hourglass");
+        assertSame(start, ctx.getCurrentRoom(), "the hourglass should undo the move");
+    }
+
+    @Test
+    void aSpentHourglassRefuses() {
+        player.addItem(new Hourglass(0));
+        run("north");
+        Room afterMove = ctx.getCurrentRoom();
+
+        run("use hourglass");
+        assertSame(afterMove, ctx.getCurrentRoom(), "a spent hourglass changes nothing");
+    }
+
+    @Test
+    void usingAPotionHealsAndConsumesIt() {
+        player.setHp(10);
+        player.addItem(new Potion("Test Draught", 0.2, 10, 25));
+
+        run("use draught");
+
+        assertTrue(player.getHp() > 10);
+        assertNull(player.findItem("Test Draught"));
+    }
+
+    // ---------- the free capabilities ----------
+
+    @Test
+    void theReplayLogRecordsWhatTheSessionActuallyDid() {
+        run("look");
+        run("north");
+        run("status");
+
+        assertEquals(java.util.List.of("look", "north", "status"), history.replayLog());
     }
 
     // ---------- regression ----------

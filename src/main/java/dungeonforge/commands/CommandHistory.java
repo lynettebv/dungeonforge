@@ -22,13 +22,22 @@ public class CommandHistory {
         while (undoStack.size() > maxDepth) undoStack.removeLast();
     }
 
+    // public boolean undoLast() {
+       // if (undoStack.isEmpty()) return false;
+        // undoStack.pop().undo();
+        // return true;
+
     public boolean undoLast() {
         if (undoStack.isEmpty()) return false;
-        undoStack.pop().undo();
+
+        Command command = undoStack.pop();
+        command.undo();
         return true;
     }
 
     public int depth() { return undoStack.size(); }
     public List<String> replayLog() { return new ArrayList<>(this.replaying); }
     public void clear() {undoStack.clear(); replaying.clear(); }
+
+
 }
