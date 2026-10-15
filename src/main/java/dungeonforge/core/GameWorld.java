@@ -61,6 +61,34 @@ public class GameWorld {
             }
             levels.add(level);
         }
+        linkRooms();
+    }
+
+    /**
+     * WEEK 7 (provided): wire the rooms into something walkable.
+     *
+     * Deliberately a straight corridor -- "north" goes deeper, "south" goes back, and the last
+     * room of a level has "down" to the next level. Week 10's generators replace this with a
+     * real graph. It is here so that "move" is a genuine action this week.
+     */
+    private void linkRooms() {
+        for (int d = 0; d < levels.size(); d++) {
+            List<Room> rooms = levels.get(d).getRooms();
+            for (int r = 0; r + 1 < rooms.size(); r++) {
+                rooms.get(r).link("north", rooms.get(r + 1));
+                rooms.get(r + 1).link("south", rooms.get(r));
+            }
+            if (d + 1 < levels.size()) {
+                rooms.get(rooms.size() - 1).link("down", levels.get(d + 1).getRooms().get(0));
+            }
+        }
+    }
+
+    public Room startingRoom() { return levels.get(0).getRooms().get(0); }
+
+    public DungeonLevel levelContaining(Room room) {
+        for (DungeonLevel l : levels) if (l.getRooms().contains(room)) return l;
+        return levels.get(0);
     }
 
     /**
@@ -96,3 +124,4 @@ public class GameWorld {
         return n;
     }
 }
+

@@ -7,30 +7,35 @@
 
   <groupId>edu.redwoods.cis18</groupId>
   <artifactId>dungeonforge</artifactId>
-  <version>0.4.0</version>
+  <version>0.7.0</version>
   <packaging>jar</packaging>
 
   <name>DungeonForge</name>
-  <description>CIS-18 semester project. Week 5: Strategy + Observer.</description>
 
   <properties>
     <maven.compiler.release>21</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <junit.version>5.10.2</junit.version>
+    <argparse4j.version>0.9.0</argparse4j.version>
   </properties>
 
   <dependencies>
+    <!--
+      Command-line parsing. Added to the project during the Week 5-6 window.
+      Note the trade-off: the game is no longer runnable with a bare JDK, so the
+      no-Maven path (javac + java) now needs this jar on the classpath too.
+    -->
+    <dependency>
+      <groupId>net.sourceforge.argparse4j</groupId>
+      <artifactId>argparse4j</artifactId>
+      <version>${argparse4j.version}</version>
+    </dependency>
+
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <version>${junit.version}</version>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>net.sourceforge.argparse4j</groupId>
-      <artifactId>argparse4j</artifactId>
-      <version>0.9.0</version>
-      <scope>compile</scope>
     </dependency>
   </dependencies>
 
@@ -54,19 +59,6 @@
           <mainClass>dungeonforge.Main</mainClass>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>3.4.1</version>
-        <configuration>
-          <archive>
-            <manifest>
-              <mainClass>dungeonforge.Main</mainClass>
-            </manifest>
-          </archive>
-        </configuration>
-      </plugin>
     </plugins>
   </build>
 </project>
-

@@ -28,6 +28,12 @@ public abstract class Entity {
     public int getDefense()      { return defense; }
     public boolean isAlive()     { return hp > 0; }
 
+    /**
+     * WEEK 7: needed so a TurnSnapshot can put hit points back during undo.
+     * Clamped, so no snapshot can restore an impossible value.
+     */
+    public void setHp(int hp) { this.hp = Math.max(0, Math.min(hp, maxHp)); }
+
     public void takeDamage(int amount) { hp = Math.max(0, hp - Math.max(0, amount)); }
     public void heal(int amount)       { hp = Math.min(maxHp, hp + Math.max(0, amount)); }
 
@@ -35,3 +41,4 @@ public abstract class Entity {
 
     @Override public String toString() { return name; }
 }
+
