@@ -71,12 +71,15 @@ demonstrates Command without it.
 
 | Story | Estimated | Actual hours | High, low, about right? |
 |---|---|---|---|
-| US-5.1 | 4 | | |
-| US-5.2 | 3 | | |
-| US-5.3 | 2 | | |
-| US-5.4 | 1 | | |
+| US-5.1 | 4 | 5 | low |
+| US-5.2 | 3 | 4 | low |
+| US-5.3 | 2 | 2 | about right |
+| US-5.4 | 1 | 1 | about right |
 
-**Points completed:** ____ · **Running velocity:** ____
+**Points completed:** __10__ · **Running velocity:** __8.75__
 
 ## Sprint Review — one sentence
 
+This sprint I implemented the Command Pattern 
+to allow players to undo actions, loot entire rooms, and rewind turns using an hourglass,
+but I fell super behind schedule due to moving and balancing work with school.
