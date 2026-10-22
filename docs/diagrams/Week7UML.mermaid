@@ -1,0 +1,212 @@
+classDiagram
+    direction TB
+
+    namespace Singleton_Pattern {
+        class GameConfig
+        class RandomSource
+    }
+
+    namespace Strategy_Pattern {
+        class CombatStrategy
+        class AggressiveStrategy
+        class RangedStrategy
+        class SkittishStrategy
+        class HealerStrategy
+        class Action
+    }
+
+    namespace Observer_Pattern {
+        class GameEventListener
+        class EventBus
+        class GameEvent
+        class EventType
+        class CombatLog
+        class QuestTracker
+        class Quest
+        class AchievementSystem
+        class DangerMeter
+        class ConsolePrinter
+    }
+
+    namespace Command_Pattern {
+        class Command
+        class AbstractCommand
+        class AttackCommand
+        class MoveCommand
+        class TakeCommand
+        class DropCommand
+        class UseItemCommand
+        class MacroCommand
+        class SimpleCommand
+        class NoCommand
+        class CommandFactory
+        class CommandParser
+        class CommandHistory
+        class GameContext
+        class TurnSnapshot
+    }
+
+    namespace Factory_Patterns {
+        class MonsterFactory
+        class MonsterDef
+        class RoomPopulator
+        class StandardRoomPopulator
+        class TreasureRoomPopulator
+        class BossRoomPopulator
+        class ThemeKit
+        class CryptThemeKit
+        class ForgeThemeKit
+        class FrostThemeKit
+        class WinterfellThemeKit
+        class ThemeRegistry
+    }
+
+    namespace Domain_Model {
+        class Entity
+        class Player
+        class Monster
+        class Room
+        class DungeonLevel
+        class GameWorld
+        class Combat
+        class Main
+    }
+
+    namespace Items_Model {
+        class Item
+        class Weapon
+        class Armor
+        class Potion
+        class Treasure
+        class Hourglass
+        class Chest
+    }
+
+    <<interface>> CombatStrategy
+    <<interface>> GameEventListener
+    <<interface>> Command
+    <<interface>> CommandFactory
+    <<interface>> ThemeKit
+    <<interface>> Item
+    <<abstract>> Entity
+    <<abstract>> AbstractCommand
+    <<abstract>> RoomPopulator
+    <<enumeration>> EventType
+
+    RandomSource ..> GameConfig : reads seed
+    MonsterFactory ..> GameConfig : loads monsters json
+    MonsterFactory ..> RandomSource : stat variance
+    SkittishStrategy ..> GameConfig : fleeThreshold
+    RangedStrategy ..> RandomSource : wait roll
+    Player ..> GameConfig : starting stats
+    CommandHistory ..> GameConfig : undoDepth
+    Combat ..> GameConfig : flee threshold and rest heal
+    GameWorld ..> GameConfig : depth and rooms per level
+    GameWorld ..> RandomSource : treasure room roll
+    StandardRoomPopulator ..> RandomSource : monster count
+    TreasureRoomPopulator ..> RandomSource : loot count
+
+    CombatStrategy <|.. AggressiveStrategy
+    CombatStrategy <|.. RangedStrategy
+    CombatStrategy <|.. SkittishStrategy
+    CombatStrategy <|.. HealerStrategy
+    CombatStrategy ..> Action : returns
+    Action --> Entity : target
+    Monster o-- CombatStrategy : current strategy
+    MonsterFactory ..> CombatStrategy : strategyFor name
+    Combat ..> CombatStrategy : chooseAction
+    Combat ..> Action : executes by type
+    Combat ..> SkittishStrategy : swaps in when HP low
+    HealerStrategy ..> Room : scans allies
+
+    GameEventListener <|.. CombatLog
+    GameEventListener <|.. QuestTracker
+    GameEventListener <|.. AchievementSystem
+    GameEventListener <|.. DangerMeter
+    GameEventListener <|.. ConsolePrinter
+    EventBus o-- GameEventListener : notifies
+    EventBus ..> GameEvent : publishes
+    GameEvent --> EventType : typed by
+    QuestTracker *-- Quest : tracks
+    QuestTracker --> EventBus : posts quest complete
+    AchievementSystem --> EventBus : posts achievement
+    DangerMeter --> Player : reads HP
+    ConsolePrinter --> CombatLog : formats lines
+    Combat --> EventBus : publishes combat events
+    Main ..> EventBus : subscribes listeners
+
+    Command <|.. AbstractCommand
+    Command <|.. MacroCommand
+    Command <|.. SimpleCommand
+    Command <|.. NoCommand
+    AbstractCommand <|-- AttackCommand
+    AbstractCommand <|-- MoveCommand
+    AbstractCommand <|-- TakeCommand
+    AbstractCommand <|-- DropCommand
+    AbstractCommand <|-- UseItemCommand
+    MacroCommand o-- Command : children
+    CommandParser o-- CommandFactory : verb registry
+    CommandParser ..> Command : creates
+    CommandParser ..> MacroCommand : loot macro
+    CommandHistory o-- Command : undo stack
+    AbstractCommand --> GameContext : ctx
+    AbstractCommand ..> TurnSnapshot : captures before turn
+    TurnSnapshot ..> Player : saves and restores
+    TurnSnapshot ..> Room : saves and restores
+    GameContext --> Combat : runMonsterTurns
+    GameContext --> CommandHistory : history
+    GameContext --> EventBus : bus
+    GameContext --> GameWorld : world
+    GameContext --> Room : current room
+    AttackCommand ..> Combat : playerStrikes
+    UseItemCommand ..> CommandHistory : hourglass undoLast
+    UseItemCommand ..> Hourglass : spends charge
+    UseItemCommand ..> Potion : heals player
+    Main ..> CommandParser : parse input
+    Main ..> CommandHistory : push command
+
+    MonsterFactory *-- MonsterDef : blueprints
+    MonsterFactory ..> Monster : creates
+    RoomPopulator <|-- StandardRoomPopulator
+    RoomPopulator <|-- TreasureRoomPopulator
+    RoomPopulator <|-- BossRoomPopulator
+    RoomPopulator o-- ThemeKit : theme
+    RoomPopulator ..> Room : populate
+    RoomPopulator ..> Chest : optional hook
+    ThemeKit <|.. CryptThemeKit
+    ThemeKit <|.. ForgeThemeKit
+    ThemeKit <|.. FrostThemeKit
+    ThemeKit <|.. WinterfellThemeKit
+    CryptThemeKit --> MonsterFactory : creates monsters
+    ForgeThemeKit --> MonsterFactory : creates monsters
+    FrostThemeKit --> MonsterFactory : creates monsters
+    WinterfellThemeKit --> MonsterFactory : creates monsters
+    ThemeKit ..> Item : createLoot
+    ThemeKit ..> RandomSource : picks flavor and loot
+    ThemeRegistry *-- ThemeKit : one per theme
+    ThemeRegistry --> MonsterFactory : passes to kits
+    GameWorld *-- ThemeRegistry : themes
+    GameWorld *-- MonsterFactory : monsterFactory
+    GameWorld ..> RoomPopulator : picks by room type
+
+    Entity <|-- Player
+    Entity <|-- Monster
+    Player o-- Item : inventory
+    GameWorld *-- DungeonLevel : levels
+    GameWorld --> Player : player
+    DungeonLevel *-- Room : rooms
+    Room o-- Monster : monsters
+    Room o-- Item : floor items
+    Room o-- Chest : chest
+    Room --> Room : exits
+    Combat ..> Player : damage and rewards
+    Combat ..> Monster : damage and flee
+    Main ..> GameWorld : builds
+    Main ..> Combat : builds
+
+    Item <|.. Weapon
+    Item <|.. Armor
+    Item <|.. Potion
+    Item <|.. Treasure
+    Item <|.. Hourglass
+    Chest o-- Item : contents
