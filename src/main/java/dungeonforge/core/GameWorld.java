@@ -87,7 +87,9 @@ public class GameWorld {
     public Room startingRoom() { return levels.get(0).getRooms().get(0); }
 
     public DungeonLevel levelContaining(Room room) {
-        for (DungeonLevel l : levels) if (l.getRooms().contains(room)) return l;
+        for (DungeonLevel l : levels) {
+            if (l.getRooms().contains(room)) return l;
+        }
         return levels.get(0);
     }
 
@@ -124,4 +126,3 @@ public class GameWorld {
         return n;
     }
 }
-

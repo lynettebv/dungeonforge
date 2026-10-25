@@ -4,13 +4,14 @@ import dungeonforge.core.Combat;
 import dungeonforge.core.Room;
 import dungeonforge.events.GameEvent;
 
+/** WEEK 7 -- COMMAND. */
 public class MoveCommand extends AbstractCommand {
 
     private final String direction;
 
     public MoveCommand(GameContext ctx, String direction) {
         super(ctx, direction);
-        this.direction = direction;
+        this.direction = direction.toLowerCase();
     }
 
     @Override
@@ -30,6 +31,5 @@ public class MoveCommand extends AbstractCommand {
         return true;
     }
 
-    @Override
-    public String getDescription() { return direction; }
+    @Override public String getDescription() { return direction; }
 }

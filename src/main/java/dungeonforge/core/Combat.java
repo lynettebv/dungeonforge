@@ -1,54 +1,47 @@
 package dungeonforge.core;
 
 import dungeonforge.behavior.Action;
+import dungeonforge.behavior.AggressiveStrategy;
 import dungeonforge.behavior.SkittishStrategy;
 import dungeonforge.config.GameConfig;
 import dungeonforge.events.EventBus;
 import dungeonforge.events.EventType;
 import dungeonforge.events.GameEvent;
 
-import javax.security.auth.callback.LanguageCallback;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * WEEK 5 -- a minimal encounter resolver. New this week so that monsters have something to
- * DO. Week 7 turns player actions into Command objects and Week 10 replaces this loop with a
- * Template Method, so do not polish it -- it is scaffolding.
+ * WEEK 5 -- strategies decide HOW a monster fights.
+ * WEEK 7 -- one round at a time, because a human is typing.
  *
- * TODO(week 5, US-3.1): look at monsterActs(). Every monster in the game fights the same way,
- * because "how a monster fights" is an if/else chain living inside this class. A Skeleton and
- * an Imp are indistinguishable in a fight.
+ * TODO(week 8, US-6.3): now look at what happened to this class.
  *
- * The obvious fix is to subclass Monster -- AggressiveMonster, RangedMonster, SkittishMonster.
- * Before you do that, count: we have 15 species and we want 4 behaviours. Do the arithmetic
- * in docs/strategy-observer-clinic.md Part D1 BEFORE you write any code.
+ * A monster has a LIFECYCLE -- idle, hunting, enraged, fleeing, dead -- and that lifecycle is
+ * currently expressed as a String field plus conditionals in THREE separate places below:
  *
- * TODO(week 5, US-3.3): look at everything this class prints, and at the xp/gold bookkeeping.
- * Combat knows about the console. If we want quests, achievements or a scrolling log, they
- * all have to be bolted into this class, and it grows forever.
+ *   updateMonsterState()  the transitions themselves, as nested ifs
+ *   monsterActs()         "can this monster act at all?"
+ *   damageFrom()          "is it enraged, and therefore hitting harder?"
+ *
+ * Chapter 10 of your textbook opens with exactly this design and then dismantles it. Before
+ * you start, answer these in docs/evidence.md:
+ *
+ *   1. Add a "stunned" state that lasts one turn. How many methods below must you edit?
+ *   2. Reading updateMonsterState(), can you tell at a glance which states can follow
+ *      "enraged"? How long did it take you to be sure?
+ *   3. What stops someone writing m.setStateName("dancing") somewhere and breaking everything?
  */
 public class Combat {
 
     private final EventBus bus;
 
-    public Combat(EventBus bus) {
-        this.bus = bus;
-    }
+    public Combat(EventBus bus) { this.bus = bus; }
 
-    private static final int MAX_ROUNDS = 40;
-
-    /**
-     * WEEK 7 -- one round of MONSTER actions.
-     *
-     * Week 5's fight() ran an entire battle in a single call, because nobody was typing.
-     * Now a human acts one command at a time, so the encounter has to resolve one round at a
-     * time too. The player's half of a round has moved out of this class entirely -- find out
-     * where in US-5.1.
-     */
+    /** One round of MONSTER actions. */
     public void monsterTurns(Player player, Room room) {
         for (Monster m : livingMonsters(room)) {
-            checkForTacticsChange(m);
+            updateMonsterState(m);
             monsterActs(m, player, room);
             if (!player.isAlive()) break;
         }
@@ -59,24 +52,112 @@ public class Combat {
         }
     }
 
-    /** Damage the player deals. Called by whatever represents "the player attacks". */
-    public void playerStrikes(Player player, Monster target) {
-        playerActsOn(player, target);
+    /**
+     * TODO(week 8): PLACE 1 OF 3 -- the transitions, as nested conditionals.
+     *
+     * Every arrow in the monster's lifecycle is buried in here somewhere, and the ones that
+     * are ABSENT (dead never becomes hunting) are invisible -- they are simply branches that
+     * were never written.
+     */
+    private void updateMonsterState(Monster m) {
+        double flee = GameConfig.getInstance().getDouble("fleeThreshold");
+        double enrage = GameConfig.getInstance().getDouble("enrageThreshold");
+        String current = m.getStateName();
+
+        if (!m.isAlive()) {
+            announce(m, current, "dead");
+            m.setStateName("dead");
+            return;
+        }
+        if (current.equals("idle")) {
+            announce(m, current, "hunting");
+            m.setStateName("hunting");
+            return;
+        }
+        if (current.equals("hunting")) {
+            if (m.hpFraction() < flee) {
+                announce(m, current, "fleeing");
+                m.setStateName("fleeing");
+                m.setStrategy(new SkittishStrategy());
+            } else if (m.hpFraction() < enrage) {
+                announce(m, current, "enraged");
+                m.setStateName("enraged");
+                m.setStrategy(new AggressiveStrategy());
+            }
+            return;
+        }
+        if (current.equals("enraged")) {
+            if (m.hpFraction() < flee) {
+                announce(m, current, "fleeing");
+                m.setStateName("fleeing");
+                m.setStrategy(new SkittishStrategy());
+            }
+            return;
+        }
+        // "fleeing" and "dead" have no outbound transitions -- but you can only discover that
+        // by noticing the absence of branches, which is not a great way to learn a state machine.
     }
 
-    public Monster firstLivingIn(Room room) { return firstLiving(room); }
+    private void announce(Monster m, String from, String to) {
+        if (from.equals(to)) return;
+        bus.publish(GameEvent.of(EventType.STRATEGY_CHANGED,
+                "name", m.getName(), "from", from, "to", to));
+    }
 
+    /** TODO(week 8): PLACE 2 OF 3 -- "may this monster act?", as a conditional. */
+    private void monsterActs(Monster m, Player player, Room room) {
+        String state = m.getStateName();
+        if (state.equals("idle") || state.equals("dead")) return;
+        if (m.getStrategy() == null) return;
 
-    private void playerActsOn(Player player, Monster target) {
-        // --- player's turn: hit the first thing still standing ---
+        Action action = m.getStrategy().chooseAction(m, player, room);
+        if (action == null) return;
 
+        switch (action.getType()) {
+            case ATTACK -> {
+                int dmg = damageFrom(m);
+                player.takeDamage(dmg);
+                bus.publish(GameEvent.of(EventType.DAMAGE_TAKEN,
+                        "source", m.getName(), "amount", dmg, "flavor", action.getFlavor()));
+            }
+            case RANGED_ATTACK -> {
+                int dmg = Math.max(1, (int) Math.round(damageFrom(m) * 0.8));
+                player.takeDamage(dmg);
+                bus.publish(GameEvent.of(EventType.DAMAGE_TAKEN,
+                        "source", m.getName(), "amount", dmg, "flavor", action.getFlavor()));
+            }
+            case FLEE -> {
+                room.getMonsters().remove(m);
+                bus.publish(GameEvent.of(EventType.MONSTER_FLED, "name", m.getName()));
+            }
+            case HEAL_ALLY -> {
+                if (action.getTarget() != null) {
+                    action.getTarget().heal(5);
+                    bus.publish(GameEvent.of(EventType.MONSTER_HEALED,
+                            "healer", m.getName(), "target", action.getTarget().getName()));
+                }
+            }
+            case WAIT -> bus.publish(GameEvent.message(action.getFlavor()));
+        }
+    }
+
+    /** TODO(week 8): PLACE 3 OF 3 -- "is it enraged?", as another conditional. */
+    private int damageFrom(Monster m) {
+        int base = m.getAttackPower();
+        if (m.getStateName().equals("enraged")) {
+            return (int) Math.round(base * 1.5);
+        }
+        return base;
+    }
+
+    public void playerStrikes(Player player, Monster target) {
         int damage = player.getAttackPower();
         target.takeDamage(damage);
         bus.publish(GameEvent.of(EventType.DAMAGE_DEALT,
-                "target", target.getName(),
-                "amount", damage
-        ));
+                "target", target.getName(), "amount", damage));
+
         if (!target.isAlive()) {
+            target.setStateName("dead");
             player.addXp(target.getXpReward());
             player.addGold(target.getXpReward() * 2);
             bus.publish(GameEvent.of(EventType.MONSTER_DIED,
@@ -86,58 +167,7 @@ public class Combat {
         }
     }
 
-    private void checkForTacticsChange(Monster m) {
-        double threshold = GameConfig.getInstance().getDouble("fleeThreshold");
-        if (m.hpFraction() >= threshold) return;
-        if (m.getStrategy() instanceof SkittishStrategy) return;
-
-        String from = m.getStrategy().name();
-        m.setStrategy(new SkittishStrategy());
-        bus.publish(GameEvent.of(EventType.STRATEGY_CHANGED,
-                "name", m.getName(), "from", from, "to", m.getStrategy().name()));
-    }
-
-    /**
-     * TODO(week 5, US-3.1 and US-3.2): THIS METHOD IS THE WHOLE PROBLEM.
-     *
-     *  - every monster behaves identically, so species is cosmetic
-     *  - adding a behaviour means editing this method
-     *  - a monster cannot CHANGE tactics when it is badly wounded, because the behaviour
-     *    is not a thing that can be swapped -- it is code baked into the encounter loop
-     */
-    private void monsterActs(Monster m, Player player, Room room) {
-        if(m.getStrategy() == null) return;
-        Action action = m.getStrategy().chooseAction(m, player, room);
-        if( action == null ) return;
-
-        switch (action.getType()) {
-            case ATTACK -> {
-                int dmg = m.getAttackPower();
-                player.takeDamage(dmg);
-                bus.publish(GameEvent.of(EventType.DAMAGE_TAKEN,
-                        "source", m.getName(), "amount", dmg, "flavor", action.getFlavor()));
-            }
-            case RANGED_ATTACK ->  {
-                int dmg = Math.max(1, (int)Math.round(m.getAttackPower() * 0.8));
-                player.takeDamage(dmg);
-                bus.publish(GameEvent.of(EventType.DAMAGE_TAKEN,
-                        "source", m.getName(), "amount", dmg, "flavor", action.getFlavor()));
-            }
-            case FLEE -> {
-               room.getMonsters().remove(m);
-                bus.publish(GameEvent.of(EventType.MONSTER_FLED, "name", m.getName()));
-            }
-            case HEAL_ALLY -> {
-                if(action.getTarget() != null) {
-                    bus.message(action.getFlavor());
-                    action.getTarget().heal(5);
-                    bus.publish(GameEvent.of(EventType.MONSTER_HEALED,
-                            "healer", m.getName(), "target", action.getTarget().getName()));
-                }
-            }
-            case WAIT -> bus.publish(GameEvent.message(action.getFlavor()));
-        }
-    }
+    public Monster firstLivingIn(Room room) { return firstLiving(room); }
 
     private boolean hasLiving(Room room) { return firstLiving(room) != null; }
 
@@ -152,11 +182,9 @@ public class Combat {
         return out;
     }
 
-    /** Between rooms the player catches their breath. Tunable, so it lives in config. */
     /** Between rooms the player catches their breath. The dead do not catch their breath. */
     public static void restAfterRoom(Player player) {
         if (!player.isAlive()) return;
         player.heal(GameConfig.getInstance().getInt("restHealPerRoom"));
     }
 }
-

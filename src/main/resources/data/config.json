@@ -4,15 +4,15 @@
   "playerStartingDefense": 3,
   "carryCapacity": 60,
 
-  "dungeonDepth": 4,
+  "dungeonDepth": 3,
   "roomsPerLevel": 8,
   "maxMonstersPerRoom": 2,
 
   "restHealPerRoom": 8,
   "fleeThreshold": 0.30,
+  "enrageThreshold": 0.45,
 
   "undoDepth": 25,
 
-  "seed": 20260829
+  "seed": 20260818
 }
-

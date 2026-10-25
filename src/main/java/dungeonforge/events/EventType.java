@@ -1,5 +1,6 @@
 package dungeonforge.events;
 
+/** WEEK 5 -- OBSERVER. The vocabulary the model publishes. */
 public enum EventType {
     DAMAGE_DEALT,
     DAMAGE_TAKEN,

@@ -11,12 +11,28 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TurnSnapshot {
-    private final Player player;
+/**
+ * WEEK 7 -- the BEFORE-state a turn-ending Command captures so undo() can work.
+ *
+ * ==================== READ THIS, IT IS THE POINT OF PART D2 ====================
+ * The textbook version of undo is "remember the one field I changed." For
+ * AttackCommand that would be "remember the monster's hit points."
+ *
+ * Try it and it does not work. Attacking ends your turn, so the monsters retaliate. Undoing
+ * the attack must also undo the damage they did to you, the XP you gained, the gold, and any
+ * monster that changed tactics or fled. One remembered field cannot do that.
+ *
+ * The honest fix is to snapshot everything a turn can touch. That is a small MEMENTO --
+ * Head First Ch. 14's appendix -- and NOTICING WHY IT WAS NECESSARY is worth more than the
+ * class itself. Command gives you the hook for undo; it does not tell you what to remember.
+ * ==============================================================================
+ */
+public final class TurnSnapshot {
 
+    private final Player player;
     private final Room room;
 
-    private int hp, xp, gold;
+    private final int hp, gold, xp;
     private final List<Item> inventory;
     private final List<Monster> monsters;
     private final List<Item> floorItems;
@@ -30,15 +46,16 @@ public class TurnSnapshot {
         this.room = room;
 
         this.hp = player.getHp();
-        this.xp = player.getXp();
         this.gold = player.getGold();
+        this.xp = player.getXp();
         this.inventory = new ArrayList<>(player.getInventory());
 
         this.monsters = new ArrayList<>(room.getMonsters());
         this.floorItems = new ArrayList<>(room.getFloorItems());
-        this.chestContents = room.getChest() == null ? null : new ArrayList<>(room.getChest().getContents());
+        this.chestContents = room.getChest() == null
+                ? null : new ArrayList<>(room.getChest().getContents());
 
-        for (Monster m : this.monsters) {
+        for (Monster m : room.getMonsters()) {
             monsterHp.put(m, m.getHp());
             monsterStrategies.put(m, m.getStrategy());
         }
@@ -49,30 +66,28 @@ public class TurnSnapshot {
     }
 
     public void restore() {
-        player.setHp(this.hp);
-        player.setXp(this.xp);
-        player.setGold(this.gold);
+        player.setHp(hp);
+        player.setGold(gold);
+        player.setXp(xp);
         player.getInventory().clear();
-        player.getInventory().addAll(this.inventory);
+        player.getInventory().addAll(inventory);
 
         room.getMonsters().clear();
-        room.getMonsters().addAll(this.monsters);
+        room.getMonsters().addAll(monsters);          // brings back anything that fled
         room.getFloorItems().clear();
-        room.getFloorItems().addAll(this.floorItems);
+        room.getFloorItems().addAll(floorItems);
         if (chestContents != null && room.getChest() != null) {
             room.getChest().getContents().clear();
-            room.getChest().getContents().addAll(this.chestContents);
+            room.getChest().getContents().addAll(chestContents);
         }
 
-        for(Map.Entry<Monster, Integer> e : this.monsterHp.entrySet()) {
+        for (Map.Entry<Monster, Integer> e : monsterHp.entrySet()) {
             e.getKey().setHp(e.getValue());
         }
-
-        for(Map.Entry<Monster, CombatStrategy> e : this.monsterStrategies.entrySet()) {
-            e.getKey().setStrategy(e.getValue());
+        for (Map.Entry<Monster, CombatStrategy> e : monsterStrategies.entrySet()) {
+            e.getKey().setStrategy(e.getValue());     // un-panics anything that turned skittish
         }
     }
 
-    public Player getPlayer() { return player; }
     public Room getRoom() { return room; }
 }

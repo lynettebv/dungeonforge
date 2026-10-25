@@ -13,7 +13,20 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * WEEK 7 -- COMMAND (the INVOKER).
+ *
+ * A registry Map, not an if/else chain. Compare with the Week 6 gameLoop():
+ *
+ *   adding a verb   -> one register() line, instead of another else-if
+ *   adding an alias -> one alias() line,    instead of "|| verb.equals(...)" everywhere
+ *   undo            -> possible at all, because parse() returns an OBJECT
+ *
+ * The invoker never learns what any command does. It maps text to objects and hands them
+ * over; the game loop calls execute(). That ignorance is the pattern working.
+ */
 public class CommandParser {
+
     private final Map<String, CommandFactory> registry = new LinkedHashMap<>();
     private final Map<String, String> aliases = new LinkedHashMap<>();
 
@@ -23,21 +36,22 @@ public class CommandParser {
     public CommandParser(QuestTracker quests, AchievementSystem achievements) {
         this.quests = quests;
         this.achievements = achievements;
-
         registerDefaults();
     }
 
     public void register(String verb, CommandFactory factory) { registry.put(verb, factory); }
-    public void alias(String shortForm, String verb) { aliases.put(shortForm, verb); }
-    public List<String> verbs() {return new ArrayList<>(registry.keySet()); }
+    public void alias(String shortForm, String verb)          { aliases.put(shortForm, verb); }
 
+    public List<String> verbs() { return new ArrayList<>(registry.keySet()); }
+
+    /** Text in, Command out. NEVER null -- see NoCommand. */
     public Command parse(String input, GameContext ctx) {
         if (input == null || input.isBlank()) return new NoCommand(ctx.getBus(), "");
 
         String trimmed = input.trim();
         int space = trimmed.indexOf(' ');
-        String verb = (space < 0) ? trimmed : trimmed.substring(0, space).toLowerCase();
-        String args = (space < 0) ? "" : trimmed.substring(space + 1).trim();
+        String verb = (space < 0 ? trimmed : trimmed.substring(0, space)).toLowerCase();
+        String args = space < 0 ? "" : trimmed.substring(space + 1).trim();
 
         verb = aliases.getOrDefault(verb, verb);
 
@@ -50,12 +64,14 @@ public class CommandParser {
     }
 
     private void registerDefaults() {
-        register("north", (GameContext c, String a) -> new MoveCommand(c, "north"));
-        register("south", (GameContext c, String a) -> new MoveCommand(c, "south"));
-        register("down", (GameContext c, String a) -> new MoveCommand(c, "down"));
+        // --- movement: three verbs, one class ---
+        register("north", (c, a) -> new MoveCommand(c, "north"));
+        register("south", (c, a) -> new MoveCommand(c, "south"));
+        register("down",  (c, a) -> new MoveCommand(c, "down"));
         alias("n", "north");
         alias("s", "south");
         alias("d", "down");
+        alias("descend", "down");
 
         register("attack", AttackCommand::new);
         alias("a", "attack");
@@ -69,87 +85,102 @@ public class CommandParser {
         register("drop", DropCommand::new);
 
         register("use", UseItemCommand::new);
-        alias("drink", "use");
         alias("quaff", "use");
+        alias("drink", "use");
 
-        register("look", (GameContext c, String a) -> new SimpleCommand("look",
-                () -> c.getBus().message(describeRoom(c))));
-
+        // --- MACRO: one word, many commands ---
         register("loot", (c, a) -> makeLootMacro(c));
 
-        register("inventory", (GameContext c, String a) -> new SimpleCommand("inventory",
-                () -> {
+        register("undo", (c, a) -> new SimpleCommand("undo", () -> {
+            if (c.getHistory().undoLast()) c.getBus().message("You take that back.");
+            else c.getBus().message("There is nothing left to undo.");
+        }));
+        alias("z", "undo");
+
+        // --- read-only commands ---
+        register("look", (c, a) -> new SimpleCommand("look",
+                () -> c.getBus().message(describeRoom(c))));
+        alias("l", "look");
+
+        register("inventory", (c, a) -> new SimpleCommand("inventory", () -> {
             if (c.getPlayer().getInventory().isEmpty()) {
                 c.getBus().message("You are carrying nothing.");
                 return;
             }
             StringBuilder b = new StringBuilder("You are carrying:");
-            for(Item i : c.getPlayer().getInventory()) b.append("\n      - ").append(i.describe());
+            for (Item i : c.getPlayer().getInventory()) b.append("\n    - ").append(i.describe());
             c.getBus().message(b.toString());
         }));
         alias("i", "inventory");
+        alias("inv", "inventory");
 
-        register("status", (GameContext c, String a) -> new SimpleCommand("status",
+        register("status", (c, a) -> new SimpleCommand("status",
                 () -> c.getBus().message(c.getPlayer().describe())));
 
-        register("quests", (GameContext c, String a) -> new SimpleCommand("quests", () -> {
+        register("quests", (c, a) -> new SimpleCommand("quests", () -> {
             StringBuilder b = new StringBuilder("Quests:");
-            for(Quest q : quests.getQuests()) b.append("\n      - ").append(q);
-            b.append("\nAchievements: ").append(
-                    achievements.getUnlocked().isEmpty() ? "(none yet)" :
-                            String.join(", ", achievements.getUnlocked()) );
+            for (Quest q : quests.getQuests()) b.append("\n  ").append(q);
+            b.append("\nAchievements: ").append(achievements.getUnlocked().isEmpty()
+                    ? "(none yet)" : String.join(", ", achievements.getUnlocked()));
+            c.getBus().message(b.toString());
+        }));
+        alias("q", "quests");
+
+        register("history", (c, a) -> new SimpleCommand("history", () -> {
+            List<String> log = c.getHistory().replayLog();
+            StringBuilder b = new StringBuilder("Your session so far (" + log.size() + " actions):");
+            for (String line : log) b.append("\n  ").append(line);
+            b.append("\n  [undo stack depth: ").append(c.getHistory().depth()).append("]");
             c.getBus().message(b.toString());
         }));
 
-        register("help", (GameContext c, String a) -> new SimpleCommand("help", () -> {
-            c.getBus().message("Available: " + verbs() + "\n Aliases: " + aliases);
-        }));
+        register("help", (c, a) -> new SimpleCommand("help",
+                () -> c.getBus().message("Available: " + String.join(", ", verbs())
+                        + "\n  Aliases: " + aliases)));
         alias("?", "help");
 
-        register("quit", (GameContext c, String a) -> new SimpleCommand("quit", () -> {
+        register("quit", (c, a) -> new SimpleCommand("quit", () -> {
             c.getBus().message("You lay down your pack.");
             c.stop();
         }));
         alias("exit", "quit");
     }
 
-    public Command makeLootMacro(GameContext ctx) {
+    /** WEEK 7 -- assembles a MACRO COMMAND at parse time from whatever is in the room. */
+    private static Command makeLootMacro(GameContext ctx) {
         Room room = ctx.getCurrentRoom();
         List<Item> targets = new ArrayList<>(room.getFloorItems());
-        if(room.getChest() != null && !room.getChest().getContents().isEmpty()) targets.addAll(room.getChest().getContents());
+        if (room.hasChest()) targets.addAll(room.getChest().getContents());
 
         if (targets.isEmpty()) {
-            return new NoCommand(ctx.getBus(), "There is nothing here to loot!");
+            return new NoCommand(ctx.getBus(), "There is nothing here to loot.");
         }
-
         List<Command> children = new ArrayList<>();
         for (Item item : targets) {
             children.add(new TakeCommand(ctx, item.getName()));
         }
-        return new MacroCommand("loot "+ children.size(), children);
+        return new MacroCommand("loot x" + children.size(), children);
     }
 
-    public String describeRoom(GameContext ctx) {
+    private static String describeRoom(GameContext ctx) {
         Room room = ctx.getCurrentRoom();
         DungeonLevel level = ctx.getWorld().levelContaining(room);
         StringBuilder b = new StringBuilder();
-        b.append("[").append(room.getId()).append("Level ").append(level.getDepth()).append(": ")
-                .append(level.getThemeName());
-        if (!room.getFlavor().isEmpty()) b.append("\n   \"").append(room.getFlavor()).append("\"");
+        b.append("[").append(room.getId()).append("] Level ").append(level.getDepth())
+         .append(": ").append(level.getThemeName());
+        if (!room.getFlavor().isEmpty()) b.append("\n  \"").append(room.getFlavor()).append("\"");
         if (room.hasLivingMonsters()) {
-            b.append("\n Hostiles:");
+            b.append("\n  Hostile:");
             for (Monster m : room.getMonsters()) {
                 if (m.isAlive()) b.append(" ").append(m.describe());
             }
         }
-        for (Item i : room.getFloorItems()) b.append("\n On the floor: ").append(i.describe());
-        if (room.getChest() != null && !room.getChest().getContents().isEmpty()) {
-            b.append("\n    ").append(room.getChest().getName()).append(": ");
-            for (Item i : room.getChest().getContents()) {
-                b.append("\n    - ").append(i.describe());
-            }
+        for (Item i : room.getFloorItems()) b.append("\n  On the floor: ").append(i.describe());
+        if (room.hasChest()) {
+            b.append("\n  ").append(room.getChest().getName()).append(":");
+            for (Item i : room.getChest().getContents()) b.append("\n    - ").append(i.describe());
         }
-        b.append("\n    Exits: ").append(String.join(", ", room.getExits().keySet()));
+        b.append("\n  Exits: ").append(String.join(", ", room.getExits().keySet()));
         return b.toString();
     }
 }
