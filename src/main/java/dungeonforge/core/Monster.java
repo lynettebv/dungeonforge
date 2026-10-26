@@ -2,6 +2,8 @@ package dungeonforge.core;
 
 import dungeonforge.behavior.CombatStrategy;
 import dungeonforge.config.RandomSource;
+import dungeonforge.states.IdleState;
+import dungeonforge.states.MonsterState;
 
 /**
  * WEEK 1 -- a monster.
@@ -28,7 +30,8 @@ public class Monster extends Entity {
      * holding the current state, and conditionals about that field scattered through every
      * method that cares. Grep Combat.java for getStateName() before you start, and count.
      */
-    private String stateName = "idle";
+
+    private MonsterState stateName = new IdleState();
 
     /**
      * WEEK 5 correction: stat variance used to be rolled here AND again in MonsterFactory,
@@ -49,8 +52,13 @@ public class Monster extends Entity {
     public CombatStrategy getStrategy()              { return strategy; }
     public void setStrategy(CombatStrategy strategy) { this.strategy = strategy; }
 
-    public String getStateName()          { return stateName; }
-    public void setStateName(String name) { this.stateName = name; }
+    public MonsterState getState()          { return stateName; }
+
+    public void setState(MonsterState next) {
+        if (next == null || next == this.stateName) return;
+        this.stateName = next;
+        next.onEnter(this);
+    }
 
     /** How close to death, as a fraction. Strategies read this to decide whether to run. */
     public double hpFraction() { return maxHp == 0 ? 0 : (double) hp / maxHp; }

@@ -121,6 +121,11 @@ class CommandTest {
         m.setStrategy(new dungeonforge.behavior.AggressiveStrategy());
         room.getMonsters().add(m);
 
+        int hpAtStart = player.getHp();
+        run("attack");                      // idle: takes the hit, notices u
+        assertEquals(hpAtStart, player.getHp()); // pins the first blow rule
+        assertEquals("hunting", m.getState().label());  // Make sure the monster is hunting!
+
         int hpBefore = player.getHp();
         int monsterHpBefore = m.getHp();
 
