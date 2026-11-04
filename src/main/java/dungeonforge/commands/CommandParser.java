@@ -144,6 +144,9 @@ public class CommandParser {
                         + String.join(", ", c.allowedVerbs()))));
         alias("?", "help");
 
+        register("pack", (c, a) -> new SimpleCommand("pack", c::openPack));
+        register("back", (c, a) -> new SimpleCommand("back", c::closePack));
+
         register("quit", (c, a) -> new SimpleCommand("quit", () -> {
             c.getBus().message("You lay down your pack.");
             c.stop();

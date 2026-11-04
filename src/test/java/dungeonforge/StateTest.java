@@ -121,6 +121,37 @@ class StateTest {
                 "the legal verb list must change with the mode");
     }
 
+    // ---------- US-6.2: dedicated screens ----------
+
+    @Test
+    void thePackIsItsOwnModeYouEnterAndLeaveOnPurpose() {
+        run("pack");
+        assertInstanceOf(InventoryState.class, ctx.getState());
+        run("back");
+        assertInstanceOf(ExploringState.class, ctx.getState());
+    }
+
+    /** A mode the player chose must not be yanked away by the world changing. */
+    @Test
+    void openingThePackSurvivesAMonsterArriving() {
+        run("pack");
+        ctx.getCurrentRoom().getMonsters().add(monster("Skeleton", 20, 3));
+        ctx.syncState();
+
+        assertInstanceOf(InventoryState.class, ctx.getState(),
+                "syncState must leave a deliberately-entered sub-state alone");
+    }
+
+    @Test
+    void deathIsAStateNotABoolean() {
+        player.setHp(0);
+        ctx.syncState();
+
+        assertInstanceOf(GameOverState.class, ctx.getState());
+        assertEquals(4, ctx.allowedVerbs().size());
+        assertFalse(ctx.allowedVerbs().contains("north"));
+    }
+
     // ---------- US-6.3: monsters have a lifecycle ----------
 
     @Test

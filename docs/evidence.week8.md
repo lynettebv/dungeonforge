@@ -87,12 +87,21 @@ doesn't check whether it's a valid monster state.
 **Paste `help` in Exploring and in Combat, side by side:**
 
 ```
-
+ -- Combat
+ [Combat] you can: attack, look, use, inventory, status, history, undo, 
+   help, quit
+ -- Exploring
+ [Exploring] you can: north, south, down, look, take, loot, drop, use, 
+   inventory, pack, status, quests, history, undo, help, quit
 ```
 
 **Paste an attempt to move during combat:**
 
 ```
+[Combat | HP 77/80] > n
+
+  You cannot do that in Combat mode. 
+Available here: attack, look, use, inventory, status, history, undo, help, quit
 
 ```
 
@@ -103,13 +112,21 @@ grep -rn "hasLivingMonsters" src/main/java/dungeonforge/commands/
 ```
 
 ```
-
+$ grep -rn "hasLivingMonsters" src/main/java/dungeonforge/commands/
+src/main/java/dungeonforge/commands/GameContext.java:58:        if (currentRoom.hasLivingMonsters()) transitionTo(new CombatState());
 ```
 
 **Paste entering and leaving the pack, and the prompt in each mode:**
 
 ```
+[Exploring | HP 77/80] > pack
 
+   ---- Your pack --- ('back' to close)
+
+back
+[Pack | HP 77/80] > 
+
+[Exploring | HP 77/80] > 
 ```
 
 ## 3. AFTER — US-6.3
@@ -121,13 +138,37 @@ grep -n "getStateName\|\"enraged\"\|\"idle\"" src/main/java/dungeonforge/core/Co
 ```
 
 ```
+lynet@LynetteV MINGW64 ~/IdeaProjects/dungeonforge (feat/US-6.2)
+$ grep -n "getStateName\|\"enraged\"\|\"idle\"" src/main/java/dungeonforge/core/Combat.java
 
+lynet@LynetteV MINGW64 ~/IdeaProjects/dungeonforge (feat/US-6.2)
 ```
 
 **Paste a fight showing a monster moving through its lifecycle:**
 
 ```
+[Exploring | HP 80/80] > n
 
+  You go north.
+  Ghoul is now hunting.
+  Combat! 1 hostile(s). Try 'attack'.
+
+[Combat | HP 80/80] > a
+
+  You hit Ghoul for 10.
+  Ghoul hits you for 2.
+  ACHIEVEMENT: Cornered -- Force an enemy to change tactics
+  Ghoul changes tactics: ranged -> aggressive.
+  Ghoul is now enraged.
+
+[Combat | HP 78/80] > a
+
+  You hit Ghoul for 10.
+  ACHIEVEMENT: First Blood -- Defeat your first monster
+  Ghoul dies. +12 XP.
+  The room falls quiet.
+
+[Exploring | HP 78/80] > 
 ```
 
 ## 4. AFTER — US-6.4
