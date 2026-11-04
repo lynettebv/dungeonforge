@@ -1,6 +1,9 @@
 package dungeonforge;
 
 import dungeonforge.behavior.AggressiveStrategy;
+import dungeonforge.behavior.CombatStrategy;
+import dungeonforge.behavior.HealerStrategy;
+import dungeonforge.behavior.SkittishStrategy;
 import dungeonforge.commands.Command;
 import dungeonforge.commands.CommandHistory;
 import dungeonforge.commands.CommandParser;
@@ -16,7 +19,16 @@ import dungeonforge.core.Room;
 import dungeonforge.events.AchievementSystem;
 import dungeonforge.events.EventBus;
 import dungeonforge.events.QuestTracker;
-import dungeonforge.states.*;
+import dungeonforge.states.CombatState;
+import dungeonforge.states.DeadState;
+import dungeonforge.states.EnragedState;
+import dungeonforge.states.ExploringState;
+import dungeonforge.states.FleeingState;
+import dungeonforge.states.GameOverState;
+import dungeonforge.states.HuntingState;
+import dungeonforge.states.IdleState;
+import dungeonforge.states.InventoryState;
+import dungeonforge.states.MonsterState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -43,12 +55,14 @@ class StateTest {
         history = new CommandHistory();
         ctx = new GameContext(world, player, bus, new Combat(bus), history);
         parser = new CommandParser(quests, achievements);
+        ctx.syncState();
     }
 
     private void run(String input) {
         Command c = parser.parse(input, ctx);
         c.execute();
         history.push(c);
+        ctx.syncState();
     }
 
     private Monster monster(String name, int hp, int atk) {
@@ -80,7 +94,6 @@ class StateTest {
 
         run("attack");
         assertFalse(m.isAlive());
-        ctx.syncState();
         assertInstanceOf(ExploringState.class, ctx.getState());
     }
 
@@ -216,6 +229,54 @@ class StateTest {
         assertFalse(source.contains("\"idle\""));
     }
 
+
+    // ---------- US-6.4: State and Strategy are different things ----------
+
+    @Test
+    void aMonsterHasBothAStateAndAStrategy() {
+        Monster m = monster("Bone Priest", 20, 3);
+        m.setStrategy(new HealerStrategy());
+
+        assertNotNull(m.getState());
+        assertNotNull(m.getStrategy());
+        assertEquals("healer", m.getStrategy().name());
+        assertEquals("idle", m.getState().label());
+    }
+
+    /** THE demonstration: a STATE transition can change the STRATEGY. */
+    @Test
+    void enteringRageMakesEvenAHealerAggressive() {
+        Monster priest = monster("Bone Priest", 20, 3);
+        priest.setStrategy(new HealerStrategy());
+        assertEquals("healer", priest.getStrategy().name());
+
+        priest.setState(new EnragedState());
+
+        assertEquals("aggressive", priest.getStrategy().name(),
+                "EnragedState.onEnter should swap the strategy -- state decides WHEN, strategy is WHAT");
+    }
+
+    @Test
+    void fleeingSwapsTheStrategyToSkittish() {
+        Monster m = monster("Slag Hound", 20, 3);
+        m.setState(new FleeingState());
+        assertInstanceOf(SkittishStrategy.class, m.getStrategy());
+    }
+
+    /** ...but the arrow only points one way. A strategy never sets a state. */
+    @Test
+    void changingStrategyDoesNotChangeState() {
+        Monster m = monster("Skeleton", 20, 3);
+        m.setState(new HuntingState());
+
+        CombatStrategy before = m.getStrategy();
+        m.setStrategy(new SkittishStrategy());
+
+        assertInstanceOf(HuntingState.class, m.getState(),
+                "swapping tactics must not move the monster through its lifecycle");
+        assertNotSame(before, m.getStrategy());
+    }
+
     // ---------- regression ----------
 
     @Test
@@ -235,3 +296,4 @@ class StateTest {
         assertEquals(a, b, "Week 3 determinism");
     }
 }
+

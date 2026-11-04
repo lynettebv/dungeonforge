@@ -176,18 +176,61 @@ lynet@LynetteV MINGW64 ~/IdeaProjects/dungeonforge (feat/US-6.2)
 **Paste the test output (or a demo) showing a healer that becomes aggressive when enraged:**
 
 ```
+[Exploring | HP 80/80] > n
 
+  You go north.
+  Bone Priest is now hunting.
+  Combat! 1 hostile(s). Try 'attack'.
+
+[Combat | HP 80/80] > a
+
+  You hit Bone Priest for 10.
+  Bone Priest hits you for 3.
+  Bone Priest changes tactics: healer -> aggressive.
+  Bone Priest is now enraged.
+
+[Combat | HP 77/80] > a
+
+  You hit Bone Priest for 10.
+  Bone Priest dies. +12 XP.
+  The room falls quiet.
+  
+  -- Unit Test also passed.
 ```
 
 **In one sentence: which one changed the other, and could it have gone the other way?**
 
+The state changed the strategy, and we proved in the unit tests that it didn't go the other way. (i.e. strategy > state)
 
 ## 5. Tests and CI
 
 **`mvn test` summary:**
 
 ```
-
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dungeonforge.CommandTest
+[INFO] Tests run: 19, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.170 s -- in dungeonforge.CommandTest
+[INFO] Running dungeonforge.FactoryTest
+[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.056 s -- in dungeonforge.FactoryTest
+[INFO] Running dungeonforge.SingletonTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.021 s -- in dungeonforge.SingletonTest
+[INFO] Running dungeonforge.SkeletonTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in dungeonforge.SkeletonTest
+[INFO] Running dungeonforge.StateTest
+[INFO] Tests run: 22, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.091 s -- in dungeonforge.StateTest
+[INFO] Running dungeonforge.StrategyObserverTest
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.037 s -- in dungeonforge.StrategyObserverTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 86, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  4.002 s
+[INFO] Finished at: 2026-11-04T01:32:44-08:00
 ```
 
 **Green CI URL:**
@@ -196,3 +239,5 @@ lynet@LynetteV MINGW64 ~/IdeaProjects/dungeonforge (feat/US-6.2)
 
 > What can the project do now that it could not do last week?
 
+The game now supports different modes that control which commands are available, 
+including Exploring, Combat, Pack, and Game Over.
