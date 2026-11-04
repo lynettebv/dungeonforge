@@ -5,6 +5,11 @@ import dungeonforge.core.GameWorld;
 import dungeonforge.core.Player;
 import dungeonforge.core.Room;
 import dungeonforge.events.EventBus;
+import dungeonforge.states.CombatState;
+import dungeonforge.states.ExploringState;
+import dungeonforge.states.GameState;
+
+import java.util.List;
 
 /**
  * WEEK 7 -- the RECEIVER, bundled.
@@ -26,6 +31,8 @@ public class GameContext {
     private Room currentRoom;
     private boolean running = true;
 
+    private GameState state = new ExploringState();
+
     public GameContext(GameWorld world, Player player, EventBus bus,
                        Combat combat, CommandHistory history) {
         this.world = world;
@@ -36,6 +43,29 @@ public class GameContext {
         this.currentRoom = world.startingRoom();
     }
 
+    public void transitionTo(GameState next) {
+        if (next == null || next.getClass() == state.getClass()) return;
+        state.onExit(this);
+        state = next;
+        next.onEnter(this);
+    }
+
+    public void syncState() {
+        /* TODO: uncomment when GameOver and InventoryState created
+        if (!player.isAlive() || !running) {
+            transitionTo(new GameOverState());
+            return;
+        }
+        if (state instanceof InventoryState) return;
+        */
+
+        if (currentRoom.hasLivingMonsters()) transitionTo(new CombatState());
+        else transitionTo(new ExploringState());
+    }
+
+    public List<String> allowedVerbs() { return state.availableCommands(); }
+
+
     public GameWorld getWorld()          { return world; }
     public Player getPlayer()            { return player; }
     public EventBus getBus()             { return bus; }
@@ -45,6 +75,7 @@ public class GameContext {
     public void setCurrentRoom(Room r)   { this.currentRoom = r; }
     public boolean isRunning()           { return running; }
     public void stop()                   { this.running = false; }
+    public GameState getState() { return state; }
 
     /** After a turn-ending command, the monsters get their round. */
     public void runMonsterTurns() {

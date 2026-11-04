@@ -10,10 +10,6 @@ public class TakeCommand extends AbstractCommand {
 
     @Override
     protected boolean doExecute() {
-        if (room().hasLivingMonsters()) {
-            bus().message("Not while something is still moving in here.");
-            return false;
-        }
         Item found = takeFromFloor();
         if (found == null) found = takeFromChest();
 

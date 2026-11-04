@@ -51,15 +51,13 @@ public class Combat {
                 bus.publish(GameEvent.of(EventType.STRATEGY_CHANGED,
                         "name", m.getName(), "from", tacticsBefore, "to", m.getStrategy().name()));
             }
-            /*
-            TODO - Add MONSTER_STATE_CHANGED
+
             if (m.getState() != before) {
-                bus.publish(GameEvent.of(EventType.MONSTER_STATE_CHANGED),
+                bus.publish(GameEvent.of(EventType.MONSTER_STATE_CHANGED,
                         "name", m.getName(),
                         "from", before.label(),
-                        "to", m.getState().label());
+                        "to", m.getState().label()));
             }
-            */
 
             if (!player.isAlive()) break;
         }

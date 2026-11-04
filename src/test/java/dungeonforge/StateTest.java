@@ -1,9 +1,6 @@
 package dungeonforge;
 
 import dungeonforge.behavior.AggressiveStrategy;
-import dungeonforge.behavior.CombatStrategy;
-import dungeonforge.behavior.HealerStrategy;
-import dungeonforge.behavior.SkittishStrategy;
 import dungeonforge.commands.Command;
 import dungeonforge.commands.CommandHistory;
 import dungeonforge.commands.CommandParser;
@@ -19,12 +16,7 @@ import dungeonforge.core.Room;
 import dungeonforge.events.AchievementSystem;
 import dungeonforge.events.EventBus;
 import dungeonforge.events.QuestTracker;
-import dungeonforge.states.DeadState;
-import dungeonforge.states.EnragedState;
-import dungeonforge.states.FleeingState;
-import dungeonforge.states.HuntingState;
-import dungeonforge.states.IdleState;
-import dungeonforge.states.MonsterState;
+import dungeonforge.states.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -63,6 +55,70 @@ class StateTest {
         Monster m = new Monster(name, hp, atk, 5);
         m.setStrategy(new AggressiveStrategy());
         return m;
+    }
+
+    // ---------- US-6.1: the game has modes ----------
+
+    @Test
+    void aQuietRoomMeansExploring() {
+        assertInstanceOf(ExploringState.class, ctx.getState());
+    }
+
+    @Test
+    void aLivingMonsterPutsTheGameIntoCombat() {
+        ctx.getCurrentRoom().getMonsters().add(monster("Skeleton", 20, 3));
+        ctx.syncState();
+        assertInstanceOf(CombatState.class, ctx.getState());
+    }
+
+    @Test
+    void clearingTheRoomReturnsToExploring() {
+        Monster m = monster("Skeleton", 5, 1);
+        ctx.getCurrentRoom().getMonsters().add(m);
+        ctx.syncState();
+        assertInstanceOf(CombatState.class, ctx.getState());
+
+        run("attack");
+        assertFalse(m.isAlive());
+        ctx.syncState();
+        assertInstanceOf(ExploringState.class, ctx.getState());
+    }
+
+    /** ILLEGAL, not merely rejected: combat does not list movement at all. */
+    @Test
+    void movementIsNotAvailableDuringCombat() {
+        ctx.getCurrentRoom().getMonsters().add(monster("Skeleton", 30, 2));
+        ctx.syncState();
+
+        assertFalse(ctx.allowedVerbs().contains("north"));
+        assertInstanceOf(NoCommand.class, parser.parse("north", ctx));
+    }
+
+    @Test
+    void attackIsNotAvailableWhileExploring() {
+        assertFalse(ctx.allowedVerbs().contains("attack"));
+        assertInstanceOf(NoCommand.class, parser.parse("attack", ctx));
+    }
+
+    /** The rule lives in ONE place now, not in a guard inside each command. */
+    @Test
+    void commandsNoLongerCarryTheirOwnModeGuards() throws Exception {
+        for (String file : new String[]{"MoveCommand", "TakeCommand", "DropCommand"}) {
+            String source = java.nio.file.Files.readString(
+                    java.nio.file.Path.of("src/main/java/dungeonforge/commands/" + file + ".java"));
+            assertFalse(source.contains("hasLivingMonsters"),
+                    file + " should not check the game mode itself");
+        }
+    }
+
+    @Test
+    void helpShowsOnlyWhatIsLegalRightNow() {
+        int exploringVerbs = ctx.allowedVerbs().size();
+        ctx.getCurrentRoom().getMonsters().add(monster("Skeleton", 30, 2));
+        ctx.syncState();
+
+        assertNotEquals(exploringVerbs, ctx.allowedVerbs().size(),
+                "the legal verb list must change with the mode");
     }
 
     // ---------- US-6.3: monsters have a lifecycle ----------

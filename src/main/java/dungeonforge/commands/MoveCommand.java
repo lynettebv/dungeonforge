@@ -16,10 +16,6 @@ public class MoveCommand extends AbstractCommand {
 
     @Override
     protected boolean doExecute() {
-        if (room().hasLivingMonsters()) {
-            bus().message("You cannot walk away with enemies still standing.");
-            return false;
-        }
         Room next = room().getExit(direction);
         if (next == null) {
             bus().message("There is no way " + direction + ".");

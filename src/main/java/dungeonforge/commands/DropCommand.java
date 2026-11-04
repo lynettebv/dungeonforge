@@ -16,12 +16,6 @@ public class DropCommand extends AbstractCommand {
 
     @Override
     protected boolean doExecute() {
-        // TODO(week 8, US-6.1): guard #3. MoveCommand and TakeCommand have one of these too.
-        // Every command that cares about the game's MODE re-implements the check itself.
-        if (room().hasLivingMonsters()) {
-            bus().message("You are a little busy for inventory management.");
-            return false;
-        }
         Item item = player().findItem(args);
         if (item == null) {
             bus().message("You are not carrying anything like that.");

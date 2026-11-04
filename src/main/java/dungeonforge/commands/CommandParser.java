@@ -60,6 +60,11 @@ public class CommandParser {
             return new NoCommand(ctx.getBus(),
                     "You cannot '" + verb + "' here. Type 'help' for what you can do.");
         }
+        if (!ctx.allowedVerbs().contains(verb)) {
+            return new NoCommand(ctx.getBus(),
+                    "You cannot do that in " + ctx.getState().name() + " mode. " +
+                    "\n Available here: " + String.join(", ", ctx.allowedVerbs()));
+        }
         return factory.create(ctx, args);
     }
 
@@ -135,8 +140,8 @@ public class CommandParser {
         }));
 
         register("help", (c, a) -> new SimpleCommand("help",
-                () -> c.getBus().message("Available: " + String.join(", ", verbs())
-                        + "\n  Aliases: " + aliases)));
+                () -> c.getBus().message("[" + c.getState().name() + "] you can: "
+                        + String.join(", ", c.allowedVerbs()))));
         alias("?", "help");
 
         register("quit", (c, a) -> new SimpleCommand("quit", () -> {
@@ -169,10 +174,9 @@ public class CommandParser {
         b.append("[").append(room.getId()).append("] Level ").append(level.getDepth())
          .append(": ").append(level.getThemeName());
         if (!room.getFlavor().isEmpty()) b.append("\n  \"").append(room.getFlavor()).append("\"");
-        if (room.hasLivingMonsters()) {
-            b.append("\n  Hostile:");
-            for (Monster m : room.getMonsters()) {
-                if (m.isAlive()) b.append(" ").append(m.describe());
+        for (Monster m : room.getMonsters()) {
+            if (m.isAlive()) {
+                b.append("\n  Hostile: ").append(m.describe());
             }
         }
         for (Item i : room.getFloorItems()) b.append("\n  On the floor: ").append(i.describe());

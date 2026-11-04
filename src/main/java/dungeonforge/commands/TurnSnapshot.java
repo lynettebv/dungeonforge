@@ -5,6 +5,7 @@ import dungeonforge.core.Monster;
 import dungeonforge.core.Player;
 import dungeonforge.core.Room;
 import dungeonforge.items.Item;
+import dungeonforge.states.MonsterState;
 
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
@@ -40,6 +41,7 @@ public final class TurnSnapshot {
 
     private final Map<Monster, Integer> monsterHp = new IdentityHashMap<>();
     private final Map<Monster, CombatStrategy> monsterStrategies = new IdentityHashMap<>();
+    private final Map<Monster, MonsterState> monsterStates = new IdentityHashMap<>();
 
     private TurnSnapshot(Player player, Room room) {
         this.player = player;
@@ -58,6 +60,7 @@ public final class TurnSnapshot {
         for (Monster m : room.getMonsters()) {
             monsterHp.put(m, m.getHp());
             monsterStrategies.put(m, m.getStrategy());
+            monsterStates.put(m, m.getState());
         }
     }
 
@@ -86,6 +89,9 @@ public final class TurnSnapshot {
         }
         for (Map.Entry<Monster, CombatStrategy> e : monsterStrategies.entrySet()) {
             e.getKey().setStrategy(e.getValue());     // un-panics anything that turned skittish
+        }
+        for (Map.Entry<Monster, MonsterState> e : monsterStates.entrySet()) {
+            e.getKey().restoreState(e.getValue());    // un-notices, un-enrages, un-kills
         }
     }
 
