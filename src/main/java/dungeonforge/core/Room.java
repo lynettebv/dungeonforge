@@ -33,20 +33,21 @@ public class Room {
     public void addMonster(Monster m)   { monsters.add(m); }
     public List<Item> getFloorItems()   { return floorItems; }
     public void addItem(Item i)         { floorItems.add(i); }
-    public Map<String, Room> getExits()         { return exits; }
-    public Room getExit(String direction)       { return exits.get(direction.toLowerCase()); }
-    public void link(String direction, Room to) { exits.put(direction.toLowerCase(), to); }
+    public Chest getChest()             { return chest; }
+    public void setChest(Chest c)       { this.chest = c; }
+    public boolean hasChest()           { return chest != null && !chest.isEmpty(); }
 
-    /** The first monster still standing here, or null. */
+    public Map<String, Room> getExits()      { return exits; }
+    public Room getExit(String direction)    { return exits.get(direction.toLowerCase()); }
+    public void link(String direction, Room to) { exits.put(direction.toLowerCase(), to); }
+    /** The first monster still standing, or null. */
     public Monster firstLivingIn() {
         for (Monster m : monsters) if (m.isAlive()) return m;
         return null;
     }
 
-    public boolean hasLivingMonsters() { return firstLivingIn() != null; }
-
-    public Chest getChest()             { return chest; }
-    public void setChest(Chest c)       { this.chest = c; }
-    public boolean hasChest()           { return chest != null && !chest.isEmpty(); }
+    public boolean hasLivingMonsters() {
+        for (Monster m : monsters) if (m.isAlive()) return true;
+        return false;
+    }
 }
-

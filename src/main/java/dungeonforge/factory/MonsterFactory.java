@@ -1,12 +1,19 @@
 package dungeonforge.factory;
 
-import dungeonforge.behavior.*;
 import dungeonforge.config.GameConfig;
 import dungeonforge.config.Json;
 import dungeonforge.config.RandomSource;
+import dungeonforge.behavior.AggressiveStrategy;
+import dungeonforge.behavior.CombatStrategy;
+import dungeonforge.behavior.HealerStrategy;
+import dungeonforge.behavior.RangedStrategy;
+import dungeonforge.behavior.SkittishStrategy;
 import dungeonforge.core.Monster;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * WEEK 4 -- SIMPLE FACTORY.
@@ -27,10 +34,11 @@ import java.util.*;
  * monsters.json -- no Java changes at all.
  */
 public class MonsterFactory {
+
     private final Map<String, MonsterDef> blueprints = new LinkedHashMap<>();
 
     public MonsterFactory() {
-       loadFrom("monsters.json");
+        loadFrom("monsters.json");
     }
 
     /** Reads blueprints from a classpath resource. Content is data, not code. */
@@ -53,11 +61,11 @@ public class MonsterFactory {
                     num(m.get("xp"), 5),
                     str(m.get("theme"), "crypt"),
                     Boolean.TRUE.equals(m.get("boss")),
-                            str(m.get("strategy"), "aggressive")));
+                    str(m.get("strategy"), "aggressive")));
         }
     }
 
-    public void register(MonsterDef def) { blueprints.put(def.getId(), def); }
+    public void register(MonsterDef def) { blueprints.put(def.id, def); }
 
     /**
      * THE factory method of the Simple Factory idiom -- the single place `new Monster` lives.
@@ -71,28 +79,33 @@ public class MonsterFactory {
         }
         int scale = Math.max(0, depth - 1);
         RandomSource rng = RandomSource.getInstance();
-        Monster m = new Monster(d.getName(),
-                Math.max(1, d.getHp() + scale * 4 + rng.between(-2, 2)),
-                Math.max(1, d.getAttack() + scale + rng.between(-1, 1)),
-                d.getXp() + scale * 3);
-        m.setStrategy(strategyFor(d.getStrategy()));
+        Monster m = new Monster(
+                d.name,
+                Math.max(1, d.hp + scale * 4 + rng.between(-2, 2)),
+                Math.max(1, d.attack + scale + rng.between(-1, 1)),
+                d.xp + scale * 3);
+        // WEEK 5: the factory hands each monster its default behaviour, chosen by DATA.
+        m.setStrategy(strategyFor(d.strategy));
         return m;
     }
 
-    public List<String> idsForTheme(String name) {
-         List<String> out = new ArrayList<>();
-         for(MonsterDef d : blueprints.values()) {
-             if(d.getTheme().equals(name) && !d.isBoss()) {
-                 out.add(d.getId());
-             }
-         }
-         return out;
+    /**
+     * Ordinary (non-boss) blueprint ids for one theme. This is what a ThemeKit draws from for
+     * a normal encounter -- bosses are asked for by name, so they cannot wander into a
+     * level-one corridor.
+     */
+    public List<String> idsForTheme(String theme) {
+        List<String> out = new ArrayList<>();
+        for (MonsterDef d : blueprints.values()) {
+            if (d.theme.equals(theme) && !d.boss) out.add(d.id);
+        }
+        return out;
     }
 
     /** The boss blueprint for a theme, or null if that theme has none. */
-    public String bossIdFromTheme(String theme) {
+    public String bossIdForTheme(String theme) {
         for (MonsterDef d : blueprints.values()) {
-            if(d.getTheme().equals(theme) && d.isBoss()) return d.getId();
+            if (d.theme.equals(theme) && d.boss) return d.id;
         }
         return null;
     }
@@ -100,12 +113,18 @@ public class MonsterFactory {
     public boolean has(String id)  { return blueprints.containsKey(id); }
     public int blueprintCount()    { return blueprints.size(); }
 
+    /**
+     * WEEK 5 -- maps a strategy NAME from the data file to a strategy OBJECT.
+     *
+     * Adding a fifth behaviour is a new class plus one line here plus a data change. Notice
+     * that neither Combat nor Monster nor any ThemeKit is involved.
+     */
     public static CombatStrategy strategyFor(String name) {
-        return switch(name == null ? "" : name.toLowerCase()) {
-            case "ranged" -> new RangedStrategy();
+        return switch (name == null ? "" : name.toLowerCase()) {
+            case "ranged"   -> new RangedStrategy();
             case "skittish" -> new SkittishStrategy();
-            case "healer" -> new HealerStrategy();
-            default -> new AggressiveStrategy();
+            case "healer"   -> new HealerStrategy();
+            default         -> new AggressiveStrategy();
         };
     }
 

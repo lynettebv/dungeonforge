@@ -4,13 +4,13 @@ import dungeonforge.core.Monster;
 import dungeonforge.core.Player;
 import dungeonforge.core.Room;
 
-public class AggressiveStrategy implements CombatStrategy{
+/** WEEK 5 -- STRATEGY. Swings every turn, whatever the odds. */
+public class AggressiveStrategy implements CombatStrategy {
 
     @Override
-    public Action chooseAction(Monster self, Player player, Room room) {
-        return new Action(Action.Type.ATTACK, player, self.getName() + "lunges at you");
+    public Action chooseAction(Monster self, Player target, Room room) {
+        return new Action(Action.Type.ATTACK, target, self.getName() + " lunges at you");
     }
 
-    @Override
-    public String name() { return "aggressive"; }
+    @Override public String name() { return "aggressive"; }
 }

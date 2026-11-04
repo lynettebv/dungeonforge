@@ -30,7 +30,7 @@ public abstract class Entity {
 
     /**
      * WEEK 7: needed so a TurnSnapshot can put hit points back during undo.
-     * Clamped, so no snapshot can restore an impossible value.
+     * Clamped, so no snapshot can ever restore an impossible value.
      */
     public void setHp(int hp) { this.hp = Math.max(0, Math.min(hp, maxHp)); }
 
@@ -41,4 +41,3 @@ public abstract class Entity {
 
     @Override public String toString() { return name; }
 }
-

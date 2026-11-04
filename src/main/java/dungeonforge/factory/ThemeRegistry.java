@@ -21,6 +21,7 @@ public final class ThemeRegistry {
         kits.add(new ForgeThemeKit(factory));
         kits.add(new FrostThemeKit(factory));
         kits.add(new WinterfellThemeKit(factory));
+        // Part D: add your fourth kit here. One line.
     }
 
     /** Levels cycle through the registered themes. */
@@ -36,4 +37,3 @@ public final class ThemeRegistry {
         return out;
     }
 }
-

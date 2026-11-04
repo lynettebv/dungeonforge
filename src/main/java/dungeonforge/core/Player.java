@@ -28,20 +28,22 @@ public class Player extends Entity {
               GameConfig.getInstance().getInt("playerStartingDefense"));
     }
 
-    public List<Item> getInventory()  { return inventory; }
-    public void addItem(Item i)       { inventory.add(i); }
-    public boolean removeItem(Item i) { return inventory.remove(i); }
+    public List<Item> getInventory()   { return inventory; }
+    public void addItem(Item i)        { inventory.add(i); }
+    public boolean removeItem(Item i)  { return inventory.remove(i); }
 
     /** Case-insensitive partial match, so "use draught" finds "Quench Draught". */
     public Item findItem(String query) {
         if (query == null || query.isBlank()) return null;
         String q = query.toLowerCase();
-        for (Item i : inventory) if (i.getName().toLowerCase().contains(q)) return i;
+        for (Item i : inventory) {
+            if (i.getName().toLowerCase().contains(q)) return i;
+        }
         return null;
     }
 
-    public void setGold(int g) { this.gold = Math.max(0, g); }
-    public void setXp(int x)   { this.xp = Math.max(0, x); }
+    public void setGold(int g)    { this.gold = Math.max(0, g); }
+    public void setXp(int x)      { this.xp = Math.max(0, x); }
 
     public int getGold()          { return gold; }
     public int getXp()            { return xp; }
@@ -61,4 +63,3 @@ public class Player extends Entity {
                 + "  Carry " + carryCapacity() + "kg";
     }
 }
-

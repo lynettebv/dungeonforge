@@ -1,11 +1,13 @@
 package dungeonforge.events;
 
+/** WEEK 5 -- OBSERVER. The vocabulary the model publishes. */
 public enum EventType {
     DAMAGE_DEALT,
     DAMAGE_TAKEN,
     MONSTER_DIED,
     MONSTER_FLED,
     MONSTER_HEALED,
+    MONSTER_STATE_CHANGED,
     STRATEGY_CHANGED,
     XP_GAINED,
     GOLD_GAINED,

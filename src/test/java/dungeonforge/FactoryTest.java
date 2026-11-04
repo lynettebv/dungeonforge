@@ -60,7 +60,7 @@ public class FactoryTest {
     @Test
     void bossesAreExcludedFromTheOrdinarySpawnPool() {
         assertFalse(factory.idsForTheme("crypt").contains("bone_tyrant"));
-        assertEquals("bone_tyrant", factory.bossIdFromTheme("crypt"));
+        assertEquals("bone_tyrant", factory.bossIdForTheme("crypt"));
     }
 
     // Tests for US-2.2
