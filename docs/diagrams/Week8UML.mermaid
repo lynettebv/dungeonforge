@@ -1,0 +1,339 @@
+classDiagram
+direction LR
+
+%% DUNGEONFORGE - COMPLETE SINGLE UML CLASS DIAGRAM
+%% Pattern colors are defined at the bottom.
+%% BLUE = Singleton | AMBER = Factory | GREEN = Strategy
+%% CYAN = Observer | PURPLE = Command | PINK = State
+%% ORANGE = Template Method | GRAY = Memento / supporting model
+
+namespace Configuration {
+  class GameConfig {
+    <<Singleton>>
+    -instance : GameConfig
+    -GameConfig()
+    +getInstance() GameConfig
+    +resetForTests() void
+  }
+  class RandomSource {
+    <<Singleton>>
+    -instance : RandomSource
+    -RandomSource()
+    +getInstance() RandomSource
+    +reseed(seed) void
+  }
+  class Json
+}
+
+namespace Factories {
+  class MonsterFactory {
+    <<SimpleFactory>>
+    +create(id, depth) Monster
+    +strategyFor(name) CombatStrategy
+  }
+  class MonsterDef
+  class ThemeKit {
+    <<AbstractFactory>>
+    +themeName() String
+    +createMonster(depth) Monster
+    +createBoss(depth) Monster
+    +createLoot(depth) Item
+  }
+  class CryptThemeKit
+  class ForgeThemeKit
+  class FrostThemeKit
+  class WinterfellThemeKit
+  class ThemeRegistry {
+    +forDepth(depth) ThemeKit
+  }
+  class RoomPopulator {
+    <<FactoryMethod>>
+    +populate(room, depth) void
+    #createEncounter(depth) List
+    #createChest(depth) Chest
+  }
+  class StandardRoomPopulator
+  class TreasureRoomPopulator
+  class BossRoomPopulator
+}
+
+namespace CombatStrategyPattern {
+  class CombatStrategy {
+    <<interface>>
+    +chooseAction(self, target, room) Action
+    +name() String
+  }
+  class AggressiveStrategy
+  class RangedStrategy
+  class HealerStrategy
+  class SkittishStrategy
+  class Action {
+    +getType() Type
+    +getTarget() Entity
+  }
+}
+
+namespace ObserverPattern {
+  class GameEventListener {
+    <<interface>>
+    +onEvent(event) void
+  }
+  class EventBus {
+    +subscribe(listener) void
+    +unsubscribe(listener) void
+    +publish(event) void
+  }
+  class GameEvent
+  class EventType
+  class Quest
+  class QuestTracker
+  class AchievementSystem
+  class CombatLog
+  class DangerMeter
+}
+
+namespace CommandPattern {
+  class Command {
+    <<interface>>
+    +execute() void
+    +undo() void
+    +getDescription() String
+    +isUndoable() boolean
+    +endsTurn() boolean
+  }
+  class AbstractCommand {
+    <<TemplateMethod>>
+    +execute() void
+    #doExecute() boolean
+    +undo() void
+  }
+  class AttackCommand
+  class MoveCommand
+  class TakeCommand
+  class DropCommand
+  class UseItemCommand
+  class MacroCommand {
+    <<MacroCommand>>
+    -children : List
+    +execute() void
+    +undo() void
+  }
+  class NoCommand {
+    <<NullObject>>
+    +execute() void
+  }
+  class SimpleCommand
+  class CommandFactory {
+    <<interface>>
+    +create(ctx, args) Command
+  }
+  class CommandParser {
+    +register(verb, factory) void
+    +parse(input, ctx) Command
+  }
+  class CommandHistory {
+    +push(command) void
+    +undoLast() boolean
+    +replayLog() List
+  }
+  class TurnSnapshot {
+    <<Memento>>
+    +capture(player, room) TurnSnapshot
+    +restore() void
+  }
+}
+
+namespace GameStatePattern {
+  class GameState {
+    <<interface>>
+    +onEnter(ctx) void
+    +onExit(ctx) void
+    +availableCommands() List
+    +name() String
+  }
+  class ExploringState
+  class CombatState
+  class InventoryState
+  class GameOverState
+}
+
+namespace MonsterStatePattern {
+  class MonsterState {
+    <<interface>>
+    +onEnter(self) void
+    +canAct() boolean
+    +damageMultiplier() double
+    +next(self, player) MonsterState
+    +label() String
+  }
+  class IdleState
+  class HuntingState
+  class EnragedState
+  class FleeingState
+  class DeadState
+}
+
+namespace GameModel {
+  class Main
+  class GameContext {
+    +transitionTo(next) void
+    +syncState() void
+    +allowedVerbs() List
+    +runMonsterTurns() void
+  }
+  class Combat {
+    +monsterTurns(player, room) void
+    +playerStrikes(player, target) void
+  }
+  class Entity {
+    <<abstract>>
+    #name : String
+    #hp : int
+    +takeDamage(amount) void
+    +heal(amount) void
+  }
+  class Player
+  class Monster {
+    +setStrategy(strategy) void
+    +setState(state) void
+  }
+  class GameWorld
+  class DungeonLevel
+  class Room
+  class Item {
+    <<interface>>
+    +getName() String
+    +getWeight() double
+    +getValue() int
+  }
+  class Armor
+  class Weapon
+  class Potion
+  class Treasure
+  class Hourglass
+  class Chest
+}
+
+%% SINGLETON
+RandomSource ..> GameConfig : reads seed
+GameConfig ..> Json : parses settings
+
+%% SIMPLE FACTORY / ABSTRACT FACTORY / FACTORY METHOD
+MonsterFactory --> MonsterDef : reads blueprints
+MonsterFactory ..> Monster : creates
+MonsterFactory ..> CombatStrategy : supplies tactics
+ThemeKit <|.. CryptThemeKit
+ThemeKit <|.. ForgeThemeKit
+ThemeKit <|.. FrostThemeKit
+ThemeKit <|.. WinterfellThemeKit
+ThemeRegistry o-- ThemeKit : registers kits
+CryptThemeKit ..> MonsterFactory : delegates
+ForgeThemeKit ..> MonsterFactory : delegates
+FrostThemeKit ..> MonsterFactory : delegates
+WinterfellThemeKit ..> MonsterFactory : delegates
+RoomPopulator <|-- StandardRoomPopulator
+RoomPopulator <|-- TreasureRoomPopulator
+RoomPopulator <|-- BossRoomPopulator
+RoomPopulator --> ThemeKit : product family
+GameWorld --> ThemeRegistry : selects theme
+GameWorld --> RoomPopulator : fills rooms
+
+%% STRATEGY - SWAPPABLE COMBAT BEHAVIOR
+CombatStrategy <|.. AggressiveStrategy
+CombatStrategy <|.. RangedStrategy
+CombatStrategy <|.. HealerStrategy
+CombatStrategy <|.. SkittishStrategy
+Monster --> CombatStrategy : interchangeable tactics
+Combat ..> CombatStrategy : requests decision
+CombatStrategy ..> Action : returns
+
+%% OBSERVER - EVENT BROADCAST
+GameEventListener <|.. QuestTracker
+GameEventListener <|.. AchievementSystem
+GameEventListener <|.. CombatLog
+GameEventListener <|.. DangerMeter
+EventBus o-- GameEventListener : notifies
+EventBus ..> GameEvent : broadcasts
+GameEvent --> EventType : has type
+QuestTracker o-- Quest : tracks
+Combat --> EventBus : publishes events
+
+%% COMMAND / TEMPLATE METHOD / MACRO / NULL OBJECT / MEMENTO
+Command <|.. AbstractCommand
+AbstractCommand <|-- AttackCommand
+AbstractCommand <|-- MoveCommand
+AbstractCommand <|-- TakeCommand
+AbstractCommand <|-- DropCommand
+AbstractCommand <|-- UseItemCommand
+Command <|.. MacroCommand
+Command <|.. NoCommand
+Command <|.. SimpleCommand
+MacroCommand o-- Command : child commands
+CommandParser o-- CommandFactory : registry
+CommandFactory ..> Command : creates
+CommandParser ..> NoCommand : invalid input
+CommandHistory o-- Command : undo stack
+AbstractCommand --> GameContext : receiver context
+AbstractCommand --> TurnSnapshot : capture and restore
+TurnSnapshot ..> Player : saves attributes
+TurnSnapshot ..> Room : saves contents
+TurnSnapshot ..> Monster : saves state and tactics
+UseItemCommand ..> CommandHistory : hourglass undo
+GameContext --> CommandHistory : stores history
+
+%% STATE - PLAYER MODES
+GameState <|.. ExploringState
+GameState <|.. CombatState
+GameState <|.. InventoryState
+GameState <|.. GameOverState
+GameContext --> GameState : current player mode
+CommandParser ..> GameContext : checks allowed verbs
+
+%% STATE - MONSTER LIFECYCLE
+MonsterState <|.. IdleState
+MonsterState <|.. HuntingState
+MonsterState <|.. EnragedState
+MonsterState <|.. FleeingState
+MonsterState <|.. DeadState
+Monster --> MonsterState : current lifecycle
+Combat ..> MonsterState : action and transitions
+
+%% GAME WORLD / DOMAIN MODEL
+Entity <|-- Player
+Entity <|-- Monster
+Item <|.. Armor
+Item <|.. Weapon
+Item <|.. Potion
+Item <|.. Treasure
+Item <|.. Hourglass
+GameWorld *-- DungeonLevel : levels
+DungeonLevel *-- Room : rooms
+Room o-- Monster : monsters
+Room o-- Item : floor loot
+Room o-- Chest : chest
+Chest o-- Item : contents
+Player o-- Item : inventory
+GameContext --> GameWorld : world
+GameContext --> Player : player
+GameContext --> Combat : runs rounds
+GameContext --> Room : current room
+Main ..> GameContext : starts game
+
+%% COLOR LEGEND - each group represents an OOP pattern
+classDef singleton fill:#dbeafe,stroke:#2563eb,stroke-width:3px,color:#172554
+classDef factory fill:#fef3c7,stroke:#b45309,stroke-width:3px,color:#78350f
+classDef strategy fill:#dcfce7,stroke:#15803d,stroke-width:3px,color:#14532d
+classDef observer fill:#cffafe,stroke:#0891b2,stroke-width:3px,color:#164e63
+classDef command fill:#ede9fe,stroke:#7c3aed,stroke-width:3px,color:#4c1d95
+classDef state fill:#fce7f3,stroke:#db2777,stroke-width:3px,color:#831843
+classDef template fill:#ffedd5,stroke:#ea580c,stroke-width:3px,color:#7c2d12
+classDef memento fill:#e5e7eb,stroke:#4b5563,stroke-width:3px,color:#111827
+
+cssClass "GameConfig,RandomSource" singleton
+cssClass "MonsterFactory,MonsterDef,ThemeKit,CryptThemeKit,ForgeThemeKit,FrostThemeKit,WinterfellThemeKit,ThemeRegistry,RoomPopulator,StandardRoomPopulator,TreasureRoomPopulator,BossRoomPopulator" factory
+cssClass "CombatStrategy,AggressiveStrategy,RangedStrategy,HealerStrategy,SkittishStrategy,Action" strategy
+cssClass "GameEventListener,EventBus,GameEvent,EventType,Quest,QuestTracker,AchievementSystem,CombatLog,DangerMeter" observer
+cssClass "Command,AttackCommand,MoveCommand,TakeCommand,DropCommand,UseItemCommand,MacroCommand,NoCommand,SimpleCommand,CommandFactory,CommandParser,CommandHistory" command
+cssClass "GameState,ExploringState,CombatState,InventoryState,GameOverState,MonsterState,IdleState,HuntingState,EnragedState,FleeingState,DeadState" state
+cssClass "AbstractCommand" template
+cssClass "TurnSnapshot" memento
