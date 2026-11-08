@@ -40,7 +40,7 @@ import java.util.List;
  */
 public final class Main {
 
-    public static final String VERSION = "0.7.0";
+    public static final String VERSION = "0.9.0";
 
     private Main() { }
 
@@ -68,6 +68,9 @@ public final class Main {
         Player player = new Player(name);
         player.addItem(new Potion("Small Healing Draught", 0.3, 20, 22));
         player.addItem(new Hourglass(2));                 // US-5.4
+        // WEEK 9 (PROVIDED) -- a plain weapon to start with, so the enchantment exercises in
+        // docs/evidence.md work on turn one instead of waiting on a loot drop.
+        player.addItem(new dungeonforge.items.Weapon("Notched Shortsword", 2.5, 25, 5));
         GameWorld world = new GameWorld(player);
 
         EventBus bus = new EventBus();
@@ -106,7 +109,7 @@ public final class Main {
 
         ctx.syncState();
         while (ctx.isRunning() && ctx.getPlayer().isAlive()) {
-            System.out.print("\n[" + ctx.getState().name() + " | HP " + ctx.getPlayer().getHp() + "/"
+            System.out.print("\n["+ctx.getState().name()+" | HP " + ctx.getPlayer().getHp() + "/"
                     + ctx.getPlayer().getMaxHp() + "] > ");
             System.out.flush();
 

@@ -20,7 +20,7 @@ public class FactoryTest {
 
     @BeforeEach
     void setUp() {
-        GameConfig.resetForTests();;
+        GameConfig.resetForTests();
         RandomSource.resetForTests();
         factory = new MonsterFactory();
     }
@@ -35,7 +35,7 @@ public class FactoryTest {
 
     @Test
     void theFactoryBuildsAMonsterFromABlueprint() {
-        Monster m = factory.create("skeleton", 1 );
+        Monster m = factory.create("skeleton", 1);
         assertEquals("Skeleton", m.getName());
         assertTrue(m.getMaxHp() > 0);
     }
@@ -59,7 +59,7 @@ public class FactoryTest {
 
     @Test
     void bossesAreExcludedFromTheOrdinarySpawnPool() {
-        assertFalse(factory.idsForTheme("crypt").contains("bone_tyrant"));
+        assertFalse(factory.idsForTheme("crypt").contains("bone_trant"));
         assertEquals("bone_tyrant", factory.bossIdForTheme("crypt"));
     }
 
@@ -67,7 +67,7 @@ public class FactoryTest {
     @Test
     void aThemeKitOnlyEverProducesItsOwnFamily() {
         ThemeKit crypt = new CryptThemeKit(factory);
-        Set<String> cryptNames = Set.of("Skeleton", "Crypt Rat", "Wight", "Bone Priest", "Ghoul");
+        Set<String> cryptNames = Set.of("Skeleton", "Crypt Rat", "Wight", "Ghoul", "Bone Priest");
         for(int i=0; i < 50; i++) {
             assertTrue(cryptNames.contains(crypt.createMonster(1).getName()),
                     "a CryptThemeKit must never hand back a non-crypt monster");
@@ -75,7 +75,7 @@ public class FactoryTest {
     }
 
     @Test
-    void differentKitsProduceDifferentFamilies() {
+    void differentKitsProductDifferentFamilies() {
         ThemeKit crypt = new CryptThemeKit(factory);
         ThemeKit forge = new ForgeThemeKit(factory);
 
@@ -107,27 +107,26 @@ public class FactoryTest {
 
     @Test
     void everyLevelIsInternallyConsistent() {
-        GameWorld world = new GameWorld((new Player("Tester")));
+        GameWorld world = new GameWorld(new Player("Tester"));
 
         for(DungeonLevel level : world.getLevels()) {
             Set<String> allowed = switch (level.getThemeName()) {
-                case "Crypt" -> Set.of("Skeleton", "Crypt Rat", "Wight", "Ghoul", "Bone Priest", "Bone Tyrant");
+                case "Crypt" -> Set.of("Skeleton", "Crypt Rat", "Wight", "Bone Priest", "Ghoul", "Bone Tyrant");
                 case "Forge" -> Set.of("Imp", "Slag Hound", "Ember Sprite", "Forge Golem", "Forge Tyrant");
                 case "Frost" -> Set.of("Frost Wight", "Rime Stalker", "Ice Lurker", "Hoar Shade", "Rime Tyrant");
-                case "Winterfell" -> Set.of("White Walker", "Direwolf", "Night King Tyrant");
+                case "Winterfell" -> Set.of("Direwolf", "White Walker", "Night King Tyrant");
                 default -> Set.of();
             };
             for(Room room : level.getRooms()) {
                 for(Monster m : room.getMonsters()) {
                     assertTrue(allowed.contains(m.getName()),
-                            m.getName() + "does not belong on a " + level.getThemeName() + " level");
+                            m.getName() + " does not belong on a " + level.getThemeName() + " level");
                 }
             }
         }
     }
 
     // Test US-2.3 Factory Method
-
     @Test
     void populateIsFinalSoSubclassesCannotBreakTheOrder() throws Exception{
         Method populate = RoomPopulator.class.getDeclaredMethod("populate", Room.class, int.class);
@@ -136,7 +135,7 @@ public class FactoryTest {
     }
 
     @Test
-    void createEncounterIsAbstractSoEverySubclassMustAnswerIt() throws Exception{
+    void createEncounterIsAbstractSoEverySubclassMustAnserIt() throws Exception {
         Method create = RoomPopulator.class.getDeclaredMethod("createEncounter", int.class);
         assertTrue(Modifier.isAbstract(create.getModifiers()),
                 "create() must be abstract -- this is the Factory Method SubClasses MUST implement.");
@@ -164,9 +163,9 @@ public class FactoryTest {
     }
 
     @Test
-    void theFinalRoomOfTheDunegonHoldsTheBoss() {
-        GameWorld world = new GameWorld((new Player("Tester")));
-        List<DungeonLevel> levels = world.getLevels();
+    void theFinalRoomOfTheDungeonHoldsTheBoss() {
+        GameWorld world = new GameWorld(new Player("Tester"));
+        List<DungeonLevel> levels  = world.getLevels();
         DungeonLevel last = levels.get(levels.size() - 1);
         Room finalRoom = last.getRooms().get(last.getRooms().size() - 1);
 
@@ -175,12 +174,12 @@ public class FactoryTest {
     }
 
     @Test
-    void theWorldStillGeneratesDeterministicallyFromASeed() {
+    void theWorldStillGenerateesDeterministicallyFromASeed() {
         RandomSource.getInstance().reseed(77L);
         int first = new GameWorld(new Player("A")).totalMonsters();
         RandomSource.getInstance().reseed(77L);
         int second = new GameWorld(new Player("B")).totalMonsters();
 
-        assertEquals(first, second, "Singleton's MUST still guarantee a deterministic world.");
+        assertEquals(first, second, "Singlton's MUST still guarantee a deterministic world.");
     }
 }

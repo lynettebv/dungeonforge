@@ -41,6 +41,7 @@ public final class TurnSnapshot {
 
     private final Map<Monster, Integer> monsterHp = new IdentityHashMap<>();
     private final Map<Monster, CombatStrategy> monsterStrategies = new IdentityHashMap<>();
+    // ADDED
     private final Map<Monster, MonsterState> monsterStates = new IdentityHashMap<>();
 
     private TurnSnapshot(Player player, Room room) {

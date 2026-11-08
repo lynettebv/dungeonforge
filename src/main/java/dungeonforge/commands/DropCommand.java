@@ -16,6 +16,7 @@ public class DropCommand extends AbstractCommand {
 
     @Override
     protected boolean doExecute() {
+        // TODO(week 8, US-6.1): guard #3. MoveCommand and TakeCommand have one of these too.
         Item item = player().findItem(args);
         if (item == null) {
             bus().message("You are not carrying anything like that.");

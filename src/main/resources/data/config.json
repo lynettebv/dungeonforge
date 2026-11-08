@@ -4,7 +4,7 @@
   "playerStartingDefense": 3,
   "carryCapacity": 60,
 
-  "dungeonDepth": 3,
+  "dungeonDepth": 4,
   "roomsPerLevel": 8,
   "maxMonstersPerRoom": 2,
 

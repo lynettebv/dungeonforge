@@ -6,7 +6,7 @@ import java.util.List;
 
 public class CombatState implements GameState {
     private final static List<String> VERBS = List.of(
-            "attack", "look", "use",  "inventory", "status", "history", "undo", "help", "quit" );
+            "attack", "look", "use", "equip", "inventory", "status", "history", "undo", "help", "quit");
 
 
     @Override
@@ -20,6 +20,8 @@ public class CombatState implements GameState {
         ctx.getBus().message("The room falls quiet.");
     }
 
-    @Override public List<String> availableCommands() { return VERBS; }
+    @Override public List<String> availableCommands() {
+        return VERBS;
+    }
     @Override public String name() { return "Combat"; }
 }

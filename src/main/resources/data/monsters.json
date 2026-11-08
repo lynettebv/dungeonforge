@@ -1,8 +1,8 @@
 {
   "skeleton":     { "name": "Skeleton",      "hp": 14, "attack": 4, "xp": 6,  "theme": "crypt", "strategy": "aggressive" },
   "crypt_rat":    { "name": "Crypt Rat",     "hp": 9,  "attack": 3, "xp": 4,  "theme": "crypt", "strategy": "skittish" },
-  "wight":        { "name": "Wight",         "hp": 18, "attack": 5, "xp": 10, "theme": "crypt", "strategy": "aggressive" },
-  "bone_priest":  { "name": "Bone Priest",   "hp": 16, "attack": 4, "xp": 12, "theme": "crypt", "strategy": "healer" },
+  "wight":        { "name": "Wight",         "hp": 18, "attack": 5, "xp": 10, "theme": "crypt", "strategy": "redcoat" },
+  "bone_priest":  { "name": "Bone Priest",   "hp": 50, "attack": 4, "xp": 12, "theme": "crypt", "strategy": "healer" },
   "ghouls":       { "name": "Ghoul",         "hp": 18, "attack": 2, "xp": 12, "theme": "crypt", "strategy": "ranged" },
   "bone_tyrant":  { "name": "Bone Tyrant",   "hp": 42, "attack": 9, "xp": 45, "theme": "crypt", "boss": true, "strategy": "aggressive" },
 
@@ -22,4 +22,3 @@
   "white_walkers":{ "name": "White Walker",  "hp": 18, "attack": 7, "xp": 14, "theme": "winterfell", "strategy": "ranged" },
   "night_king":   { "name": "Night King Tyrant",   "hp": 55, "attack": 13, "xp": 54, "theme": "winterfell", "boss": true, "strategy": "aggressive" }
 }
-

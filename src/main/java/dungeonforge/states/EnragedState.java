@@ -14,11 +14,9 @@ public class EnragedState implements MonsterState {
         self.setStrategy(new AggressiveStrategy());
     }
 
-    @Override
-    public boolean canAct() { return true; }
+    @Override public boolean canAct() { return true; }
 
-    @Override
-    public double damageMultiplier() { return DAMAGE_BONUS; }
+    @Override public double damageMultiplier() { return DAMAGE_BONUS; }
 
     @Override
     public MonsterState next(Monster self, Player player) {
@@ -30,6 +28,5 @@ public class EnragedState implements MonsterState {
         return this;
     }
 
-    @Override
-    public String label() { return "enraged"; }
+    @Override public String label() { return "enraged"; }
 }

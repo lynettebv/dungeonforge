@@ -19,16 +19,7 @@ import dungeonforge.core.Room;
 import dungeonforge.events.AchievementSystem;
 import dungeonforge.events.EventBus;
 import dungeonforge.events.QuestTracker;
-import dungeonforge.states.CombatState;
-import dungeonforge.states.DeadState;
-import dungeonforge.states.EnragedState;
-import dungeonforge.states.ExploringState;
-import dungeonforge.states.FleeingState;
-import dungeonforge.states.GameOverState;
-import dungeonforge.states.HuntingState;
-import dungeonforge.states.IdleState;
-import dungeonforge.states.InventoryState;
-import dungeonforge.states.MonsterState;
+import dungeonforge.states.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -55,14 +46,12 @@ class StateTest {
         history = new CommandHistory();
         ctx = new GameContext(world, player, bus, new Combat(bus), history);
         parser = new CommandParser(quests, achievements);
-        ctx.syncState();
     }
 
     private void run(String input) {
         Command c = parser.parse(input, ctx);
         c.execute();
         history.push(c);
-        ctx.syncState();
     }
 
     private Monster monster(String name, int hp, int atk) {
@@ -94,6 +83,7 @@ class StateTest {
 
         run("attack");
         assertFalse(m.isAlive());
+        ctx.syncState();
         assertInstanceOf(ExploringState.class, ctx.getState());
     }
 
@@ -229,7 +219,6 @@ class StateTest {
         assertFalse(source.contains("\"idle\""));
     }
 
-
     // ---------- US-6.4: State and Strategy are different things ----------
 
     @Test
@@ -296,4 +285,3 @@ class StateTest {
         assertEquals(a, b, "Week 3 determinism");
     }
 }
-

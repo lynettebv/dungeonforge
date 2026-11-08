@@ -5,8 +5,8 @@ import dungeonforge.core.Monster;
 import dungeonforge.core.Player;
 
 public class HuntingState implements MonsterState {
-    @Override
-    public boolean canAct() { return true; }
+
+    @Override public boolean canAct() { return true; }
 
     @Override
     public MonsterState next(Monster self, Player player) {
@@ -21,6 +21,5 @@ public class HuntingState implements MonsterState {
         return this;
     }
 
-    @Override
-    public String label() { return "hunting"; }
+    @Override public String label() { return "hunting"; }
 }

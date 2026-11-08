@@ -30,7 +30,6 @@ public class Monster extends Entity {
      * holding the current state, and conditionals about that field scattered through every
      * method that cares. Grep Combat.java for getStateName() before you start, and count.
      */
-
     private MonsterState stateName = new IdleState();
 
     /**
@@ -61,17 +60,18 @@ public class Monster extends Entity {
     }
 
     /**
-     * Only TurnSnapshot should call this. ANything else is a transition and belongs above.
-     */
+    * Only TurnSnapshot should call this. Anything else is a transition and belongs above.
+    */
     public void restoreState(MonsterState previous) {
         if (previous != null) this.stateName = previous;
     }
+
     /** How close to death, as a fraction. Strategies read this to decide whether to run. */
     public double hpFraction() { return maxHp == 0 ? 0 : (double) hp / maxHp; }
 
     @Override
     public String describe() {
         return species + " (" + hp + "/" + maxHp + " HP, ATK " + attackPower
-                + ", " + stateName + ")";
+                + ", " + stateName.label() + ")";
     }
 }
