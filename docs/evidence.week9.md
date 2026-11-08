@@ -13,7 +13,16 @@ grep -n 'isRunning\|!running' src/main/java/dungeonforge/Main.java \
                               src/main/java/dungeonforge/commands/GameContext.java
 ```
 
-**Paste the output. How many places spell out the game-over rule?** ______
+**Paste the output. How many places spell out the game-over rule?** ___4___
+```
+lynet@LynetteV MINGW64 ~/IdeaProjects/dungeonforge (week-9-decorator)
+$ grep -n 'isRunning\|!running' src/main/java/dungeonforge/Main.java \
+                              src/main/java/dungeonforge/commands/GameContext.java
+src/main/java/dungeonforge/Main.java:111:        while (ctx.isRunning() && ctx.getPlayer().isAlive()) {
+src/main/java/dungeonforge/Main.java:139:            if (!ctx.isRunning() || !ctx.getPlayer().isAlive()) break;
+src/main/java/dungeonforge/commands/GameContext.java:52:        if (!player.isAlive() || !running) {
+src/main/java/dungeonforge/commands/GameContext.java:71:    public boolean isRunning()           { return running; }
+```
 
 **Now open `GameOverState.java`. It lists four verbs. Try to reach one in play. What happens,
 and why?**
@@ -37,18 +46,20 @@ wc -l src/main/java/dungeonforge/items/EnchantmentForge.java
 
 | | Count |
 |---|---|
-| Weapon/enchantment classes | |
-| Files containing the fire damage bonus | |
-| `instanceof` tests in `items/` | |
-| `return null` paths in `EnchantmentForge` | |
-| Lines in `EnchantmentForge` | |
+| Weapon/enchantment classes | 8 |
+| Files containing the fire damage bonus | 4 |
+| `instanceof` tests in `items/` | 34 |
+| `return null` paths in `EnchantmentForge` | 13 |
+| Lines in `EnchantmentForge` | 108 |
 
 **Open `FlamingFrostVampiricWeapon.java`. Which of its methods contain arithmetic that also
 appears, word for word, in another file?**
 
+getDamage() is the method and getValue()
+
 
 **You want a fourth enchantment, `keen`. Before you look anything up: how many new classes
-would this package need?** ______
+would this package need?** ___15___
 
 *(Write it down before reading on.)* For N enchantments the package needs 2^N − 1 classes.
 N = 3 is 7. N = 4 is 15. N = 5 is 31.
@@ -76,41 +87,65 @@ quit
 **(a) Paste the two `status` lines from before and after the first `enchant`:**
 
 ```
+[Exploring | HP 80/80] > status
+
+  Delver  HP 80/80  ATK 15  DEF 3  Gold 0  XP 0  Carry 60.0kg  wielding Notched Shortsword [dmg 5] (2.5kg, 25g)
+
+[Exploring | HP 80/80] > enchant shortsword with flaming
+
+  The Notched Shortsword is now Flaming Notched Shortsword [dmg 9] (2.5kg, 85g)
+
+[Exploring | HP 80/80] > status
+
+  Delver  HP 80/80  ATK 15  DEF 3  Gold 0 XP 0  Carry 60.0kg  wielding Notched Shortsword [dmg 5] (2.5kg, 25g)
 
 ```
 
 **Did your damage change? Explain in one sentence why not.**
 
+No, my equipped weapon's damage stayed at 5 because enchanting replaced the weapon in my inventory 
+but didn't automatically equip it. I had to equip the Flaming Shortsword manually for the damage to increase to 9.
+
 
 **(b) Paste the refusal from the second `enchant ... with flaming`:**
 
 ```
+mg 9] (2.5kg, 85g)
 
+[Exploring | HP 80/80] > enchant shortsword with flaming
+
+  That weapon cannot take another flaming enchantment.
 ```
 
 **Is there anything wrong with what you asked for? Yes or no — then say what the refusal was
 really reporting.**
 
+No, there's nothing wrong with applying Flaming twice but there must be a limitation in the code
+because it doesn't support stacking the same enchantment more than once.
 
 **(c) Paste the response to `enchant ... with keen`:**
 
 ```
+[Exploring | HP 80/80] > enchant shortsword with keen   
 
+  No such enchantment: keen
 ```
 
 **(d) Open `EnchantmentForge.baseDamage()`. In one sentence: why does this method exist at all?
 What would have to be true for it to be unnecessary?**
 
+The method baseDamage() exists because the current enchantment system needs to figure out 
+how much damage the original weapon does before adding enchantments.
 
 **(e) Classify all four.** Two of these are the *design*; one is an ordinary *bug* that would
 exist in any design. Which is which, and how do you know?
 
 | Defect | Design, or ordinary bug? | How you can tell |
 |---|---|---|
-| (a) stale hand | | |
-| (b) no double enchantment | | |
-| (c) no fourth enchantment | | |
-| (d) base-value recovery | | |
+| (a) stale hand | ordinary bug | equipped weapon not updated |
+| (b) no double enchantment | design | only allows specific combinations |
+| (c) no fourth enchantment | design | requires manually adding new combos |
+| (d) base-value recovery | design | must recover original weapon damage |
 
 ---
 

@@ -7,6 +7,7 @@ import dungeonforge.events.AchievementSystem;
 import dungeonforge.events.Quest;
 import dungeonforge.events.QuestTracker;
 import dungeonforge.items.Item;
+import dungeonforge.states.GameOverState;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -155,6 +156,7 @@ public class CommandParser {
 
         register("quit", (c, a) -> new SimpleCommand("quit", () -> {
             c.getBus().message("You lay down your pack.");
+            c.transitionTo(new GameOverState());
             c.stop();
         }));
         alias("exit", "quit");

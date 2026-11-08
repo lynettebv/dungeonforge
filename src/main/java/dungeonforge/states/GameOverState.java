@@ -21,4 +21,5 @@ public class GameOverState implements GameState {
 
     @Override public List<String> availableCommands() { return VERBS; }
     @Override public String name() { return "Game Over"; }
+    @Override public boolean isTerminal() { return true; }
 }

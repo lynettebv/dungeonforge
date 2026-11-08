@@ -108,7 +108,7 @@ public final class Main {
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
 
         ctx.syncState();
-        while (ctx.isRunning() && ctx.getPlayer().isAlive()) {
+        while (ctx.isRunning()) {
             System.out.print("\n["+ctx.getState().name()+" | HP " + ctx.getPlayer().getHp() + "/"
                     + ctx.getPlayer().getMaxHp() + "] > ");
             System.out.flush();
@@ -136,7 +136,7 @@ public final class Main {
                                   CommandHistory history, List<String> lines) {
         for (String line : lines) {
             if (line.isBlank() || line.startsWith("#")) continue;
-            if (!ctx.isRunning() || !ctx.getPlayer().isAlive()) break;
+            if (!ctx.isRunning()) break;
             System.out.println("\n[script] > " + line);
             Command command = parser.parse(line, ctx);
             command.execute();
