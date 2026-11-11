@@ -1,0 +1,156 @@
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'LICENSE', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README-WEEK3.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README-WEEK4.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README-WEEK5.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README-WEEK7.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README-WEEK8.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/artifact-review.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/backlog-seed.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/backlog.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/command-clinic.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/diagrams/Week3UML.mermaid', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/diagrams/Week4UML.mermaid', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/diagrams/Week5UML.mermaid', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/diagrams/Week7UML.mermaid', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/diagrams/Week8UML.mermaid', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/evidence.week4.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/factory-clinic.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/git-dojo.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/retro/sprint-00.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/singleton-audit.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/sprint-00-plan.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/sprint-01-plan.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/sprint-02-plan.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/sprint-03-plan.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/sprint-05-plan.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/sprint-06-plan.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/state-clinic.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/strategy-observer-clinic.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/week05-evidence.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'pom.xml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'replay.log', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'run1.txt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'run2.txt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/seed-backlog.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/Main.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/behavior/Action.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/behavior/AggressiveStrategy.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/behavior/CombatStrategy.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/behavior/HealerStrategy.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/behavior/RangedStrategy.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/behavior/SkittishStrategy.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/commands/AbstractCommand.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/commands/AttackCommand.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/commands/Command.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/commands/CommandFactory.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/commands/CommandHistory.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/commands/CommandParser.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/commands/DropCommand.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/commands/GameContext.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/commands/MacroCommand.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/commands/MoveCommand.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/commands/NoCommand.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/commands/SimpleCommand.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/commands/TakeCommand.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/commands/TurnSnapshot.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/commands/UseItemCommand.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/config/GameConfig.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/core/Combat.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/core/DungeonLevel.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/core/Entity.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/core/GameWorld.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/core/Monster.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/core/Player.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/core/Room.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/events/AchievementSystem.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/events/CombatLog.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/events/EventBus.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/events/EventType.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/events/GameEvent.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/events/GameEventListener.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/events/Quest.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/events/QuestTracker.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/factory/BossRoomPopulator.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/factory/CryptThemeKit.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/factory/ForgeThemeKit.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/factory/FrostThemeKit.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/factory/MonsterDef.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/factory/MonsterFactory.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/factory/ThemeRegistry.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/factory/WinterfellThemeKit.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/items/Hourglass.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/items/Weapon.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/states/CombatState.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/states/DeadState.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/states/EnragedState.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/states/ExploringState.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/states/FleeingState.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/states/GameOverState.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/states/GameState.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/states/HuntingState.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/states/IdleState.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/states/InventoryState.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/java/dungeonforge/states/MonsterState.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/resources/data/config.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main/resources/data/monsters.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/test/java/dungeonforge/CommandTest.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/test/java/dungeonforge/FactoryTest.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/test/java/dungeonforge/SingletonTest.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/test/java/dungeonforge/SkeletonTest.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/test/java/dungeonforge/StateTest.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/test/java/dungeonforge/StrategyObserverTest.java', LF will be replaced by CRLF the next time Git touches it
+ .gitignore                                         |   12 [32m+[m[31m-[m
+ LICENSE                                            |    2 [32m+[m[31m-[m
+ README.md                                          |    6 [32m+[m[31m-[m
+ docs/diagrams/Week3UML.mermaid                     |  241 [32m++[m[31m--[m
+ docs/diagrams/Week4UML.mermaid                     | 1140 [32m+++++++[m[31m---------[m
+ docs/diagrams/Week5UML.mermaid                     | 1402 [32m+++++++++[m[31m-----------[m
+ docs/diagrams/Week7UML.mermaid                     |  674 [32m+++++++[m[31m---[m
+ docs/diagrams/Week8UML.mermaid                     |  797 [32m+++++++[m[31m----[m
+ docs/evidence.week4.md                             |    8 [32m+[m[31m-[m
+ docs/factory-clinic.md                             |   59 [32m+[m[31m-[m
+ docs/singleton-audit.md                            |   33 [32m+[m[31m-[m
+ docs/sprint-00-plan.md                             |   13 [32m+[m[31m-[m
+ docs/sprint-01-plan.md                             |   11 [32m+[m[31m-[m
+ docs/sprint-03-plan.md                             |   19 [32m+[m[31m-[m
+ docs/sprint-05-plan.md                             |   13 [32m+[m[31m-[m
+ docs/state-clinic.md                               |   68 [32m+[m[31m-[m
+ docs/strategy-observer-clinic.md                   |   83 [32m+[m[31m-[m
+ pom.xml                                            |    2 [32m+[m[31m-[m
+ replay.log                                         |    2 [32m+[m[31m-[m
+ run1.txt                                           |  Bin [31m2506[m -> [32m1158[m bytes
+ run2.txt                                           |  Bin [31m2274[m -> [32m1186[m bytes
+ src/main/java/dungeonforge/Main.java               |    7 [32m+[m[31m-[m
+ .../java/dungeonforge/commands/CommandParser.java  |   15 [32m+[m[31m-[m
+ .../java/dungeonforge/commands/DropCommand.java    |    1 [32m+[m
+ .../java/dungeonforge/commands/GameContext.java    |    1 [31m-[m
+ .../java/dungeonforge/commands/TurnSnapshot.java   |    1 [32m+[m
+ src/main/java/dungeonforge/core/Combat.java        |   35 [32m+[m[31m-[m
+ src/main/java/dungeonforge/core/Monster.java       |    8 [32m+[m[31m-[m
+ src/main/java/dungeonforge/core/Player.java        |   56 [32m+[m[31m-[m
+ src/main/java/dungeonforge/events/CombatLog.java   |    3 [32m+[m[31m-[m
+ src/main/java/dungeonforge/events/EventType.java   |    3 [32m+[m[31m-[m
+ .../java/dungeonforge/factory/CryptThemeKit.java   |    6 [32m+[m[31m-[m
+ .../java/dungeonforge/factory/ForgeThemeKit.java   |    6 [32m+[m[31m-[m
+ .../java/dungeonforge/factory/FrostThemeKit.java   |    6 [32m+[m[31m-[m
+ .../java/dungeonforge/factory/ThemeRegistry.java   |    1 [31m-[m
+ .../dungeonforge/factory/WinterfellThemeKit.java   |    5 [32m+[m[31m-[m
+ src/main/java/dungeonforge/items/Weapon.java       |   32 [32m+[m[31m-[m
+ src/main/java/dungeonforge/states/CombatState.java |    6 [32m+[m[31m-[m
+ src/main/java/dungeonforge/states/DeadState.java   |   12 [32m+[m[31m-[m
+ .../java/dungeonforge/states/EnragedState.java     |    9 [32m+[m[31m-[m
+ .../java/dungeonforge/states/ExploringState.java   |    9 [32m+[m[31m-[m
+ .../java/dungeonforge/states/FleeingState.java     |   12 [32m+[m[31m-[m
+ .../java/dungeonforge/states/GameOverState.java    |    5 [32m+[m[31m-[m
+ src/main/java/dungeonforge/states/GameState.java   |    1 [31m-[m
+ .../java/dungeonforge/states/HuntingState.java     |    7 [32m+[m[31m-[m
+ src/main/java/dungeonforge/states/IdleState.java   |    7 [32m+[m[31m-[m
+ .../java/dungeonforge/states/InventoryState.java   |    5 [32m+[m[31m-[m
+ src/main/resources/data/config.json                |    2 [32m+[m[31m-[m
+ src/main/resources/data/monsters.json              |    5 [32m+[m[31m-[m
+ src/test/java/dungeonforge/CommandTest.java        |   20 [32m+[m[31m-[m
+ src/test/java/dungeonforge/FactoryTest.java        |   31 [32m+[m[31m-[m
+ src/test/java/dungeonforge/StateTest.java          |   16 [32m+[m[31m-[m
+ 52 files changed, 2585 insertions(+), 2333 deletions(-)

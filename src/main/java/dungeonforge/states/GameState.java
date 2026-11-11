@@ -1,6 +1,5 @@
 package dungeonforge.states;
 
-import dungeonforge.commands.Command;
 import dungeonforge.commands.GameContext;
 
 import java.util.List;

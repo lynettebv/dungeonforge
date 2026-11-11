@@ -61,7 +61,6 @@ public class GameContext {
 
     public List<String> allowedVerbs() { return state.availableCommands(); }
 
-
     public GameWorld getWorld()          { return world; }
     public Player getPlayer()            { return player; }
     public EventBus getBus()             { return bus; }

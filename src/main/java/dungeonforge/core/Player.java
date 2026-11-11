@@ -2,6 +2,7 @@ package dungeonforge.core;
 
 import dungeonforge.config.GameConfig;
 import dungeonforge.items.Item;
+import dungeonforge.items.Weapon;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,53 @@ public class Player extends Entity {
               GameConfig.getInstance().getInt("playerStartingHp"),
               GameConfig.getInstance().getInt("playerStartingAttack"),
               GameConfig.getInstance().getInt("playerStartingDefense"));
+    }
+
+    /**
+     * WEEK 9 (PROVIDED) -- the equipped weapon.
+     *
+     * In Week 7 you were asked, in docs/evidence.md, to list every edit that adding `equip`
+     * would cost. Here is that bill, paid, so you can check your prediction:
+     *
+     *   Player      -- this field, equip(), getEquippedWeapon(), the getAttackPower()
+     *                  override below, and describe()          <- the FEATURE. Unavoidable.
+     *   Combat      -- ONE line, for lifesteal. The damage calculation did not change at all,
+     *                  because the override answers the question Combat already asked. That
+     *                  is Dependency Inversion paying rent.
+     *   EquipCommand + one register() + one alias()             <- the WIRING. Two lines.
+     *
+     * The wiring shrank. The feature did not. That is exactly what Week 7 promised, and it is
+     * worth re-reading your own answer now that you can see the invoice.
+     */
+    private Weapon equippedWeapon;
+
+    public Weapon getEquippedWeapon() { return equippedWeapon; }
+
+    /** Returns whatever was in the hand before, so the caller can put it away. */
+    public Weapon equip(Weapon w) {
+        Weapon previous = this.equippedWeapon;
+        this.equippedWeapon = w;
+        return previous;
+    }
+
+    public Weapon unequip() {
+        Weapon previous = this.equippedWeapon;
+        this.equippedWeapon = null;
+        return previous;
+    }
+
+    /**
+     * WEEK 9 (PROVIDED) -- Combat already asks every Entity how hard it hits. It keeps asking;
+     * the Player just gives a better answer now. Not one line of the damage calculation moved.
+     */
+    @Override
+    public int getAttackPower() {
+        return attackPower + (equippedWeapon == null ? 0 : equippedWeapon.getDamage());
+    }
+
+    /** Hit points the equipped weapon gives back on a landed blow. Zero for bare hands. */
+    public int lifesteal() {
+        return equippedWeapon == null ? 0 : equippedWeapon.lifesteal();
     }
 
     public List<Item> getInventory()   { return inventory; }
@@ -57,9 +105,13 @@ public class Player extends Entity {
 
     @Override
     public String describe() {
+        // WEEK 9 (PROVIDED) -- getAttackPower(), not the raw field. Reading the field here was
+        // a real bug waiting to happen: the override above would never reach this line, and
+        // `status` would keep reporting your unarmed damage forever. Call your own accessors.
         return name + "  HP " + hp + "/" + maxHp
-                + "  ATK " + attackPower + "  DEF " + defense
+                + "  ATK " + getAttackPower() + "  DEF " + defense
                 + "  Gold " + gold + "  XP " + xp
-                + "  Carry " + carryCapacity() + "kg";
+                + "  Carry " + carryCapacity() + "kg"
+                + (equippedWeapon == null ? "  (unarmed)" : "  wielding " + equippedWeapon.describe());
     }
 }
