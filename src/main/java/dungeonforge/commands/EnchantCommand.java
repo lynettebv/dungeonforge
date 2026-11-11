@@ -1,6 +1,6 @@
 package dungeonforge.commands;
 
-import dungeonforge.items.EnchantmentForge;
+import dungeonforge.items.EnchantmentRegistry;
 import dungeonforge.items.Item;
 import dungeonforge.items.Weapon;
 
@@ -19,6 +19,7 @@ public class EnchantCommand extends AbstractCommand {
 
     private Weapon before;
     private Weapon after;
+    private boolean wasEquipped;
 
     public EnchantCommand(GameContext ctx, String args) { super(ctx, args); }
 
@@ -27,14 +28,15 @@ public class EnchantCommand extends AbstractCommand {
         // "slag cleaver with flaming"  ->  split on the LAST " with "
         int at = args.toLowerCase().lastIndexOf(" with ");
         if (at < 0) {
-            bus().message("Try: enchant <weapon> with <flaming|frost|vampiric>");
+            bus().message("Try: enchant <weapon> with <" + String.join("|", EnchantmentRegistry.known()) + ">");
             return false;
         }
         String target = args.substring(0, at).trim();
         String enchantment = args.substring(at + 6).trim();
 
-        if (!EnchantmentForge.isKnown(enchantment)) {
-            bus().message("No such enchantment: " + enchantment);
+        if (!EnchantmentRegistry.isKnown(enchantment)) {
+            bus().message("No such enchantment: " + enchantment + ". Known: "
+            + String.join("|", EnchantmentRegistry.known()));
             return false;
         }
         Item item = player().findItem(target);
@@ -47,19 +49,14 @@ public class EnchantCommand extends AbstractCommand {
             return false;
         }
 
-        Weapon result = EnchantmentForge.enchant(w, enchantment);
-        if (result == null) {
-            // THE MESSAGE THAT SHOULD NOT EXIST. There is nothing wrong with the request.
-            // There is simply no class for the weapon it would produce.
-            bus().message("That weapon cannot take another " + enchantment + " enchantment.");
-            return false;
-        }
-
         before = w;
-        after = result;
+        after = EnchantmentRegistry.apply(enchantment, w);
+        wasEquipped = (player().getEquippedWeapon() == w);
+
         player().removeItem(w);
-        player().addItem(result);
-        bus().message("The " + w.getName() + " is now " + result.describe());
+        player().addItem(after);
+        if(wasEquipped) { player().equip(after); }
+        bus().message("The " + w.getName() + " is now " + after.describe());
 
         // KNOWN DEFECT (US-7.2). `result` is a DIFFERENT OBJECT. If the old weapon was the
         // equipped one, the equipped slot still points at the unenchanted original, and the
