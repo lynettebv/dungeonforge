@@ -5,19 +5,13 @@ package dungeonforge.items;
  *
  * PART OF THE PROBLEM. Do not improve this class. Count it.
  */
-public class VampiricWeapon extends Weapon {
+public class VampiricWeapon extends WeaponDecorator {
 
-    public VampiricWeapon(String name, double weight, int value, int damage) {
-        super(name, weight, value, damage);
-    }
-
-    @Override public int getDamage()  { return damage; }
-    @Override public int getValue()   { return value + 90; }
-    @Override public int lifesteal()  { return Math.max(1, damage / 4); }
+    public VampiricWeapon(Weapon wrapped) { super(wrapped); }
 
     @Override
-    public String describe() {
-        return "Vampiric " + name + " [dmg " + getDamage() + "]"
-                + " (" + String.format("%.1f", weight) + "kg, " + getValue() + "g)";
-    }
+    public int lifesteal() { return wrapped.lifesteal() + Math.max(1, wrapped.getDamage() / 4); }
+
+    @Override protected String prefix() { return "Vampiric"; }
+    @Override protected int valueBonus() { return 90; }
 }

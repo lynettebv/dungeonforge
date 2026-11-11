@@ -5,19 +5,20 @@ package dungeonforge.items;
  *
  * PART OF THE PROBLEM. Do not improve this class. Count it.
  */
-public class FlamingWeapon extends Weapon {
+public class FlamingWeapon extends WeaponDecorator {
 
-    public FlamingWeapon(String name, double weight, int value, int damage) {
-        super(name, weight, value, damage);
-    }
+    private static final int FIRE_BONUS = 4;
 
-    @Override public int getDamage()  { return damage + 4; }
-    @Override public int getValue()   { return value + 60; }
-    @Override public int lifesteal()  { return 0; }
+    public FlamingWeapon(Weapon wrapped) { super(wrapped); }
 
     @Override
-    public String describe() {
-        return "Flaming " + name + " [dmg " + getDamage() + "]"
-                + " (" + String.format("%.1f", weight) + "kg, " + getValue() + "g)";
+    protected String prefix() { return "Flaming"; }
+
+    @Override
+    protected int valueBonus() { return 60; }
+
+    @Override
+    public int getDamage() {
+        return wrapped.getDamage() + FIRE_BONUS;
     }
 }

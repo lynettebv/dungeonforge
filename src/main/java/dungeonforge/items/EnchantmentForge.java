@@ -40,6 +40,7 @@ public final class EnchantmentForge {
      * combination. Read that sentence again: the combination has to already have a class.
      */
     public static Weapon enchant(Weapon w, String enchantment) {
+        /*
         String e = enchantment == null ? "" : enchantment.toLowerCase().trim();
         String n = w.getName();
         double kg = w.getWeight();
@@ -77,6 +78,8 @@ public final class EnchantmentForge {
             if (w instanceof FrostWeapon)                return new FrostVampiricWeapon(n, kg, v, d);
             return new VampiricWeapon(n, kg, v, d);
         }
+
+    */
         return null;
     }
 
@@ -86,16 +89,19 @@ public final class EnchantmentForge {
      * applied and recover the original numbers. Two more hand-written tables.
      */
     private static int baseDamage(Weapon w) {
+        /*
         if (w instanceof FlamingFrostVampiricWeapon) return w.getDamage() - 4 - 3;
         if (w instanceof FlamingFrostWeapon)         return w.getDamage() - 4 - 3;
         if (w instanceof FlamingVampiricWeapon)      return w.getDamage() - 4;
         if (w instanceof FrostVampiricWeapon)        return w.getDamage() - 3;
         if (w instanceof FlamingWeapon)              return w.getDamage() - 4;
         if (w instanceof FrostWeapon)                return w.getDamage() - 3;
+        */
         return w.getDamage();
     }
 
     private static int baseValue(Weapon w) {
+        /*
         if (w instanceof FlamingFrostVampiricWeapon) return w.getValue() - 60 - 45 - 90;
         if (w instanceof FlamingFrostWeapon)         return w.getValue() - 60 - 45;
         if (w instanceof FlamingVampiricWeapon)      return w.getValue() - 60 - 90;
@@ -103,6 +109,7 @@ public final class EnchantmentForge {
         if (w instanceof FlamingWeapon)              return w.getValue() - 60;
         if (w instanceof FrostWeapon)                return w.getValue() - 45;
         if (w instanceof VampiricWeapon)             return w.getValue() - 90;
+       */
         return w.getValue();
     }
 }

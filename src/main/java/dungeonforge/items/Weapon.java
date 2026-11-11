@@ -12,34 +12,14 @@ package dungeonforge.items;
  * the fields went from private to protected, and getDamage()/getValue()/describe() stopped
  * being things only this class decides.
  */
-public class Weapon implements Item {
+public interface Weapon extends Item {
 
-    protected final String name;
-    protected final double weight;
-    protected final int value;
-    protected final int damage;
-
-    public Weapon(String name, double weight, int value, int damage) {
-        this.name = name;
-        this.weight = weight;
-        this.value = value;
-        this.damage = damage;
-    }
-
-    @Override public String getName()   { return name; }
-    @Override public double getWeight() { return weight; }
-    @Override public int getValue()     { return value; }
-
-    public int getDamage() { return damage; }
+    int getDamage();
 
     /**
      * WEEK 9 STARTER -- hit points restored to the wielder when this weapon lands a blow.
      * Zero for an ordinary weapon. Combat calls this after every player strike.
      */
-    public int lifesteal() { return 0; }
+    default int lifesteal() { return 0; }
 
-    @Override
-    public String describe() {
-        return name + " [dmg " + getDamage() + "] (" + String.format("%.1f", weight) + "kg, " + getValue() + "g)";
-    }
 }

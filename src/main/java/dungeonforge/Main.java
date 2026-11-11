@@ -70,7 +70,7 @@ public final class Main {
         player.addItem(new Hourglass(2));                 // US-5.4
         // WEEK 9 (PROVIDED) -- a plain weapon to start with, so the enchantment exercises in
         // docs/evidence.md work on turn one instead of waiting on a loot drop.
-        player.addItem(new dungeonforge.items.Weapon("Notched Shortsword", 2.5, 25, 5));
+        player.addItem(new dungeonforge.items.BasicWeapon("Notched Shortsword", 2.5, 25, 5));
         GameWorld world = new GameWorld(player);
 
         EventBus bus = new EventBus();

@@ -40,7 +40,7 @@ public class WinterfellThemeKit implements ThemeKit {
             // WEEK 9 STARTER -- the theme decides which of the seven subclasses to name. A kit
             // should be able to say "fiery" without a class existing for every combination of
             // fiery with everything else. Right now it cannot.
-            case 0: return new FrostVampiricWeapon("Valyrian Steel Greatsword", 6.0, 80 + depth*10, 6 + depth);
+            case 0: return new FrostWeapon(new VampiricWeapon(new BasicWeapon("Valyrian Steel Greatsword", 6.0, 80 + depth*10, 6 + depth)));
             case 1: return new Armor("Direwolf pup", 2.0, 45 + depth*8, 5 + depth);
             case 2: return new Potion("Ice Magic", 0.4, 15, 10 + depth * 3);
             default: return new Treasure("Dragon Eggs", 0.5, 60 + depth*15);

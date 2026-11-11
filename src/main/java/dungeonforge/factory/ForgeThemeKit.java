@@ -2,12 +2,7 @@ package dungeonforge.factory;
 
 import dungeonforge.config.RandomSource;
 import dungeonforge.core.Monster;
-import dungeonforge.items.Armor;
-import dungeonforge.items.Item;
-import dungeonforge.items.Potion;
-import dungeonforge.items.Treasure;
-import dungeonforge.items.Weapon;
-import dungeonforge.items.FlamingWeapon;
+import dungeonforge.items.*;
 
 /** WEEK 4 -- ABSTRACT FACTORY. Heat, imps, fire-forged steel. */
 public class ForgeThemeKit implements ThemeKit {
@@ -42,7 +37,7 @@ public class ForgeThemeKit implements ThemeKit {
             // WEEK 9 STARTER -- the theme decides which of the seven subclasses to name. A kit
             // should be able to say "fiery" without a class existing for every combination of
             // fiery with everything else. Right now it cannot.
-            case 0:  return new FlamingWeapon("Slag Cleaver", 4.0, 55 + depth * 12, 7 + depth);
+            case 0:  return new FlamingWeapon(new BasicWeapon("Slag Cleaver", 4.0, 55 + depth * 12, 7 + depth));
             case 1:  return new Armor("Scorched Plate", 6.0, 60 + depth * 10, 4 + depth);
             case 2:  return new Potion("Quench Draught", 0.4, 30, 22 + depth * 3);
             default: return new Treasure("Ingot of Bright Iron", 2.0, 80 + depth * 18);

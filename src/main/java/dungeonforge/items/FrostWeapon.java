@@ -5,19 +5,18 @@ package dungeonforge.items;
  *
  * PART OF THE PROBLEM. Do not improve this class. Count it.
  */
-public class FrostWeapon extends Weapon {
+public class FrostWeapon extends WeaponDecorator {
 
-    public FrostWeapon(String name, double weight, int value, int damage) {
-        super(name, weight, value, damage);
-    }
+    private static final int FROST_BONUS = 3;
 
-    @Override public int getDamage()  { return damage + 3; }
-    @Override public int getValue()   { return value + 45; }
-    @Override public int lifesteal()  { return 0; }
+    public FrostWeapon(Weapon wrapped) { super(wrapped); }
 
     @Override
-    public String describe() {
-        return "Frost " + name + " [dmg " + getDamage() + "]"
-                + " (" + String.format("%.1f", weight) + "kg, " + getValue() + "g)";
-    }
+    protected String prefix() { return "Frost"; }
+
+    @Override
+    protected int valueBonus() { return 45; }
+
+    @Override
+    public int getDamage() { return wrapped.getDamage() + FROST_BONUS; }
 }
