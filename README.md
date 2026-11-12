@@ -65,6 +65,7 @@ docs/<name>         documentation
 Filled in as the semester goes. By Week 16 this table is the portfolio piece.
 
 | Week | Pattern | Where it lives | Why it fits |
+|---|---|---|---|
 | 3 | Singleton | `GameConfig`, `RandomSource` | Ensures shared configuration and random number generation use a single instance. |
 | 4 | Factory Method / Abstract Factory | `MonsterFactory`, `RoomPopulator`, `ThemeKit` | Creates different monsters and themed rooms without depending on specific classes. |
 | 5 | Strategy / Observer | `CombatStrategy`, `EventBus`, `QuestTracker` | Allows monsters to change combat strategies and other systems to respond to game events. |
