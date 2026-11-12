@@ -18,6 +18,7 @@ import dungeonforge.items.BasicWeapon;
 import dungeonforge.items.EnchantmentRegistry;
 import dungeonforge.items.FlamingWeapon;
 import dungeonforge.items.FrostWeapon;
+import dungeonforge.items.KeenWeapon;
 import dungeonforge.items.VampiricWeapon;
 import dungeonforge.items.Weapon;
 import dungeonforge.states.HuntingState;
@@ -165,6 +166,46 @@ class DecoratorTest {
         assertTrue(history.undoLast());
         assertEquals("Iron Sword", player.getEquippedWeapon().getName());
         assertEquals(1, player.getInventory().size());
+    }
+
+    // ================= US-7.3: the fourth enchantment =================
+
+    @Test
+    void keenMultipliesWhereTheOthersAdd() {
+        assertEquals(12, new KeenWeapon(sword()).getDamage(), "round(8 * 1.5)");
+    }
+
+    @Test
+    void theFourthEnchantmentNeededNoChangeToTheOtherThree() {
+        assertEquals(12, new FlamingWeapon(sword()).getDamage());
+        assertEquals(11, new FrostWeapon(sword()).getDamage());
+        assertEquals(4,  EnchantmentRegistry.known().size());
+        assertTrue(EnchantmentRegistry.known().contains("keen"));
+    }
+
+    // ================= US-7.4: order is semantics, not style =================
+
+    @Test
+    void orderChangesTheResultForMultiplyingDecorators() {
+        int keenThenFire = new FlamingWeapon(new KeenWeapon(sword())).getDamage();  // 12 + 4
+        int fireThenKeen = new KeenWeapon(new FlamingWeapon(sword())).getDamage();  // round(12*1.5)
+
+        assertEquals(16, keenThenFire);
+        assertEquals(18, fireThenKeen);
+        assertNotEquals(keenThenFire, fireThenKeen,
+                "if these were equal, order would not matter and this test would be pointless");
+    }
+
+    @Test
+    void orderChangesHowMuchAVampiricWeaponDrinks() {
+        assertEquals(3, new VampiricWeapon(new FlamingWeapon(sword())).lifesteal()); // (8+4)/4
+        assertEquals(2, new FlamingWeapon(new VampiricWeapon(sword())).lifesteal()); // 8/4
+    }
+
+    @Test
+    void twoVampiricLayersDrinkTwice() {
+        assertEquals(4, new VampiricWeapon(new VampiricWeapon(sword())).lifesteal(),
+                "the inner drinks 2 from base 8; the outer drinks 2 more and adds the inner's");
     }
 
     // ================= the payoff: Combat never learned any of this =================

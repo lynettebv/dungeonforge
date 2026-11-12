@@ -15,13 +15,24 @@ but it is not the interesting number.
 ```bash
 grep -rn "damage + 4" src/main/java/dungeonforge/items/
 ```
+```
+week-9-decorator:src/main/java/dungeonforge/items/FlamingFrostVampiricWeapon.java:14:    @Override public int getDamage()  { return damage + 4 + 3; }
+week-9-decorator:src/main/java/dungeonforge/items/FlamingFrostVampiricWeapon.java:16:    @Override public int lifesteal()  { return Math.max(1, (damage + 4 + 3) / 4); }
+week-9-decorator:src/main/java/dungeonforge/items/FlamingFrostWeapon.java:14:    @Override public int getDamage()  { return damage + 4 + 3; }
+week-9-decorator:src/main/java/dungeonforge/items/FlamingVampiricWeapon.java:14:    @Override public int getDamage()  { return damage + 4; }
+week-9-decorator:src/main/java/dungeonforge/items/FlamingVampiricWeapon.java:16:    @Override public int lifesteal()  { return Math.max(1, (damage + 4) / 4); }
+week-9-decorator:src/main/java/dungeonforge/items/FlamingWeapon.java:14:    @Override public int getDamage() { return damage + 4; }
+```
 
 **Step 2.** Suppose the designer decides fire should do 5 damage instead of 4. List every file
 you must edit, and every *line* within each file.
 
 | File | Line(s) | What the edit is |
 |---|---|---|
-| | | |
+| FlamingFrostVampiricWeapon.java | 14, 16 | Change damage + 4 to damage + 5 in both damage and lifesteal calculations |
+| FlamingFrostWeapon.java | 14 | Change damage + 4 to damage + 5 |
+| FlamingVampiricWeapon.java | 14, 16 | Change damage + 4 to damage + 5 in both calculations |
+| FlamingWeapon.java | 14 | Change damage + 4 to damage + 5 |
 
 **Step 3.** Now the question that matters. `FlamingFrostWeapon` needs the fire arithmetic because
 it is a flaming weapon. It inherits from `Weapon`, which does not have it. It cannot inherit from
@@ -29,11 +40,16 @@ it is a flaming weapon. It inherits from `Weapon`, which does not have it. It ca
 
 **In one sentence: which language rule forced the duplication?**
 
+Java doesn't allow a class to extend multiple classes, so the combined enchanted weapons
+can't inherit the behavior of both FlamingWeapon and FrostWeapon.
+
 **Step 4.** Head First, p. 86, says inheritance is "powerful but... not necessarily the best way
 to achieve flexibility." Rewrite that sentence as a specific claim about this package, with your
 number from Step 1 in it.
 
-> *Answer:* ________________________________________________
+> *Answer:* Inheritance made the weapon classes harder to maintain because the same fire damage calculation
+appeared 6 times across 4 files, meaning I would have to update all 6 occurrences 
+just to change the fire damage bonus.
 
 ---
 
@@ -41,13 +57,21 @@ number from Step 1 in it.
 
 **Step 1.** In the running game, enchant a weapon with `flaming` twice. Record the message.
 
+```
+[Exploring | HP 80/80] > enchant shortsword with flaming
+
+  The Flaming Notched Shortsword is now Flaming Flaming Notched Shortsword [dmg 13] (2.5kg, 145g
+```
+
 **Step 2.** Open `EnchantmentForge.enchant()` and find the line that produced it. Paste it.
+-- deleted EnchantmentForge, create new flaming sword class
 
 **Step 3.** Answer three questions in one sentence each.
 
-1. Is a twice-flaming weapon unreasonable as a *game* idea?
-2. Is it unreasonable as a *code* idea?
-3. What, precisely, is the refusal actually reporting?
+1. Is a twice-flaming weapon unreasonable as a *game* idea? No, it's reasonable because it lets the player stack bonuses.
+2. Is it unreasonable as a *code* idea? No.
+3. What, precisely, is the refusal actually reporting? The refusal in the original implementation was 
+reporting a limitation of the old enchantment system rather than a problem with the player's request.
 
 **Step 4.** Count the branches that exist purely to say no.
 
@@ -56,7 +80,7 @@ grep -c "return null" src/main/java/dungeonforge/items/EnchantmentForge.java
 ```
 
 ______ branches. Now predict: after US-7.2, how many `return null` branches will
-`EnchantmentRegistry` have? ______
+`EnchantmentRegistry` have? ___0___
 
 **Step 5 — after you finish US-7.2.** Run the count again on the new class. **Strip comments
 first** — the registry's own comment says *"apply() cannot return null"*, and a naive grep
@@ -77,7 +101,7 @@ This is the headline experiment. You will measure the *same feature* in both des
 
 | | Count |
 |---|---|
-| New classes needed | |
+| New classes needed | 8 |
 | Existing classes needing edits | |
 | New `instanceof` tests in `EnchantmentForge` | |
 
@@ -110,19 +134,28 @@ git diff --stat HEAD~1
 
 ```bash
 grep -rln "getAttackPower\|lifesteal" src/main/java/dungeonforge/core/
+
+$ grep -rln "getAttackPower\|lifesteal" src/main/java/dungeonforge/core/
+src/main/java/dungeonforge/core/Combat.java
+src/main/java/dungeonforge/core/Entity.java
+src/main/java/dungeonforge/core/Player.java
 ```
 
 **Step 2.** For each, run `git diff main -- <file>` and record the number of changed lines.
 
 | File | Lines changed this sprint |
 |---|---|
-| `core/Combat.java` | |
-| `core/Player.java` | |
-| `core/Entity.java` | |
-| `commands/EquipCommand.java` | |
+| `core/Combat.java` | 35 |
+| `core/Player.java` | 56|
+| `core/Entity.java` | 0 |
+| `commands/EquipCommand.java` | 42 |
 
 **Step 3.** Explain the small numbers. Your answer should use the phrase "programs to the
 interface" and should name *which* interface.
+
+> The Decorator Pattern helps keep changes to the combat logic minimal because the code programs to the interface,
+> specifically the Weapon interface. Combat gets the damage and lifesteal values through Player without needing
+> to know which enchantments are applied. This means new enchantments can be added without changing Combat every time.
 
 **Step 4 — the honest half.** One thing in this sprint that Decorator did **not** fix, that you
 had to fix yourself. Name it and say why the pattern was never going to help.
@@ -130,6 +163,9 @@ had to fix yourself. Name it and say why the pattern was never going to help.
 > There is a specific answer and it is in `EnchantCommand`. If you cannot find it, reread the
 > sub-task list for US-7.2 — one of the tasks has a note under it saying exactly this.
 
+>Decorator did not fix the stale hand bug because the player's equipped weapon still referenced the original weapon
+> after enchanting it. I had to update the equipped weapon to the newly enchanted version, 
+> which was a separate issue from how the enchantments were designed.
 ---
 
 ## Turning it in

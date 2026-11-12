@@ -58,9 +58,6 @@ public class EnchantCommand extends AbstractCommand {
         if(wasEquipped) { player().equip(after); }
         bus().message("The " + w.getName() + " is now " + after.describe());
 
-        // KNOWN DEFECT (US-7.2). `result` is a DIFFERENT OBJECT. If the old weapon was the
-        // equipped one, the equipped slot still points at the unenchanted original, and the
-        // player's damage does not change. Equip, enchant, then check `status` and see.
         return true;
     }
 
