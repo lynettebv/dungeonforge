@@ -6,14 +6,15 @@ Textbook: Freeman & Robson, *Head First Design Patterns*, 2nd ed.
 
 ## Status
 
-**Week 2 — walking skeleton.** The program compiles, runs, prints a banner and passes its
-tests. There is no game yet. That starts in Week 3 with the Singleton.
+**Week 9 — Decorator Pattern.** DungeonForge is now a playable turn-based dungeon crawler with exploration, combat, inventory management, quests, and weapon enchantments.
+
+The game uses multiple design patterns to organize its functionality. The latest addition is the Decorator Pattern, which allows weapon enchantments to be stacked without creating separate classes for every possible combination.
 
 ## Run it
 
 ```bash
-mvn test          # should be green
-mvn exec:java     # prints the banner
+mvn test          # should be green, runs automated tests
+mvn exec:java     # launches DungeonForge
 ```
 
 Requires **JDK 21**.
@@ -24,10 +25,9 @@ Requires **JDK 21**.
 |---|---|
 | Definition of Done | `docs/definition-of-done.md` *(supplied)* |
 | Product backlog | `docs/backlog.md` *(supplied)* and GitHub Issues |
-| This week's sprint | `docs/sprint-00-plan.md` *(supplied)* |
-| Next week's sprint | `docs/sprint-01-plan.md` *(supplied)* |
 | Board | GitHub Projects |
 | Retrospectives | `docs/retro/` |
+| Sprint evidence | `docs/evidence.week9.md` |
 | Backlog seeding | `bash scripts/seed-backlog.sh` |
 
 > Through Week 5 the Agile artifacts are **supplied**, and your job is to run the sprint and
@@ -37,8 +37,9 @@ Requires **JDK 21**.
 ### Branch naming
 
 ```
-week-NN-pattern     pattern work        e.g. week-03-singleton
+week-NN-pattern     pattern work        e.g. week-09-decorator
 feature/<name>      a capability
+feat/<name>         a feature or user story
 fix/<name>          a defect
 chore/<name>        build, CI, tooling
 docs/<name>         documentation
@@ -64,14 +65,17 @@ docs/<name>         documentation
 Filled in as the semester goes. By Week 16 this table is the portfolio piece.
 
 | Week | Pattern | Where it lives | Why it fits |
-|---|---|---|---|
-| 3 | Singleton | | |
-| 4 | Factory Method / Abstract Factory | | |
-| 5 | Strategy / Observer | | |
-| 7 | Command | | |
-| 8 | State | | |
-| 9 | Decorator | | |
+| 3 | Singleton | `GameConfig`, `RandomSource` | Ensures shared configuration and random number generation use a single instance. |
+| 4 | Factory Method / Abstract Factory | `MonsterFactory`, `RoomPopulator`, `ThemeKit` | Creates different monsters and themed rooms without depending on specific classes. |
+| 5 | Strategy / Observer | `CombatStrategy`, `EventBus`, `QuestTracker` | Allows monsters to change combat strategies and other systems to respond to game events. |
+| 7 | Command | `Command`, `CommandHistory`, command classes | Encapsulates player actions as objects and supports undo and macros. |
+| 8 | State | `GameState`, `MonsterState`, concrete state classes | Changes available commands and monster behavior based on the current state. |
+| 9 | Decorator | `WeaponDecorator`, `FlamingWeapon`, `FrostWeapon`, `VampiricWeapon`, `KeenWeapon` | Allows enchantments to be stacked without needing separate classes for every combination. |
 | 10 | Template Method | | |
+| 12 | Adapter / Facade | | |
+| 13 | Composite / Iterator | | |
+| 14 | Pipeline / Proxy | | |
+| 15 | MVC (compound) | | |
 | 12 | Adapter / Facade | | |
 | 13 | Composite / Iterator | | |
 | 14 | Pipeline / Proxy | | |
