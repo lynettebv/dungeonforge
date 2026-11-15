@@ -40,7 +40,7 @@ import java.util.List;
  */
 public final class Main {
 
-    public static final String VERSION = "0.9.0";
+    public static final String VERSION = "0.10.0";
 
     private Main() { }
 
@@ -55,9 +55,13 @@ public final class Main {
     public static void main(String[] args) throws Exception {
         String name = "Delver";
         String script = null;
+        boolean report = false;
         for (String a : args) {
             if (a.startsWith("--seed="))        RandomSource.getInstance().reseed(Long.parseLong(a.substring(7).trim()));
             else if (a.startsWith("--script=")) script = a.substring(9).trim();
+            // WEEK 10 (PROVIDED) -- a bare boolean flag, in the same hand-rolled style as the
+            // two above. Prints the per-level invariant table and exits.
+            else if (a.equals("--report"))      report = true;
             else if (!a.startsWith("--"))       name = a;
         }
 
@@ -72,6 +76,14 @@ public final class Main {
         // docs/evidence.md work on turn one instead of waiting on a loot drop.
         player.addItem(new dungeonforge.items.BasicWeapon("Notched Shortsword", 2.5, 25, 5));
         GameWorld world = new GameWorld(player);
+
+        // WEEK 10 -- the diagnostic path. Prints the invariant table and exits before any of
+        // the game's wiring is built, because a diagnostic should need as little of the system
+        // as possible to run.
+        if (report) {
+            System.out.println(dungeonforge.core.DungeonReport.of(world));
+            return;
+        }
 
         EventBus bus = new EventBus();
         QuestTracker quests = new QuestTracker(bus);
@@ -108,7 +120,7 @@ public final class Main {
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
 
         ctx.syncState();
-        while (ctx.isRunning() && ctx.getPlayer().isAlive()) {
+        while (ctx.isRunning()) {
             System.out.print("\n["+ctx.getState().name()+" | HP " + ctx.getPlayer().getHp() + "/"
                     + ctx.getPlayer().getMaxHp() + "] > ");
             System.out.flush();
@@ -136,7 +148,7 @@ public final class Main {
                                   CommandHistory history, List<String> lines) {
         for (String line : lines) {
             if (line.isBlank() || line.startsWith("#")) continue;
-            if (!ctx.isRunning() || !ctx.getPlayer().isAlive()) break;
+            if (!ctx.isRunning()) break;
             System.out.println("\n[script] > " + line);
             Command command = parser.parse(line, ctx);
             command.execute();
