@@ -91,6 +91,7 @@ public class CommandParser {
         register("equip", EquipCommand::new);
         alias("e", "equip");
         register("enchant", EnchantCommand::new);
+        register("disenchant", DisenchantCommand::new);
         alias("n", "north");
         alias("s", "south");
         alias("d", "down");

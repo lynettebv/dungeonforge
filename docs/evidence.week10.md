@@ -55,33 +55,86 @@ mvn -q exec:java -Dexec.args="--report --seed=3"
 mvn -q exec:java -Dexec.args="--report --seed=7"
 ```
 
-**How many tests pass?** ______
+**How many tests pass?** ___110___
 
 **Paste all three dungeon reports:**
 
 ```
-
+1. "--report"
+  DUNGEON REPORT
+  ------------------------------------------------------------------
+  LEVEL  THEME         ROOMS  ORPHANS   SPAWN   EXIT
+  ------------------------------------------------------------------
+  1      Crypt             8        0       0    yes
+  2      Forge             8     4 !!       0    yes
+  3      Frost             8        0       0    yes
+  4      Winterfell        8        0       0    n/a
+  ------------------------------------------------------------------
+  orphaned rooms: 4   spawn-camped levels: 0   unreachable exits: 0
+  AT LEAST ONE LEVEL IS BROKEN. Which builder produced it, and what did it skip?
+ 
+ 2. "--report --seed=3"
+   DUNGEON REPORT
+  ------------------------------------------------------------------
+  LEVEL  THEME         ROOMS  ORPHANS   SPAWN   EXIT
+  ------------------------------------------------------------------
+  1      Crypt             8        0       0    yes
+  2      Forge             8     4 !!       0    yes
+  3      Frost             8        0    1 !!    yes
+  4      Winterfell        8        0       0    n/a
+  ------------------------------------------------------------------
+  orphaned rooms: 4   spawn-camped levels: 1   unreachable exits: 0
+  AT LEAST ONE LEVEL IS BROKEN. Which builder produced it, and what did it skip?
+  
+  3. "--report --seed=7"
+    DUNGEON REPORT
+  ------------------------------------------------------------------
+  LEVEL  THEME         ROOMS  ORPHANS   SPAWN   EXIT
+  ------------------------------------------------------------------
+  1      Crypt             8        0       0    yes
+  2      Forge             8     5 !!       0  NO !!
+  3      Frost             8        0       0    yes
+  4      Winterfell        8        0       0    n/a
+  ------------------------------------------------------------------
+  orphaned rooms: 5   spawn-camped levels: 0   unreachable exits: 1
+  AT LEAST ONE LEVEL IS BROKEN. Which builder produced it, and what did it skip?
 ```
 
 **How many of the four levels satisfy every invariant, on each seed?**
-default: ______   seed 3: ______   seed 7: ______
+default: ___3___   seed 3: ___2___   seed 7: ___3___
 
 **Seed 7 shows a symptom the other two do not.** Look at the EXIT column. What does it mean for
 a player who reaches that level?
 
+```
+On Seed 7, the player would get stuck on Level 2 because the exit is unreachable.
+The level contains 8 rooms, but 5 of them can't be reached from the entrance.
+So the player wouldn't be able to continue on to the next level.
+```
 
 **Now put the test count and the default-seed result in one sentence.** *(This is the most
 important sentence you will write this week. Two points.)*
 
-> ____________________________________________________________________
+> __Despite all 110 tests passing, the default dungeon report still exposed four orphaned rooms on Level 2,
+which means the tests weren't catching everything that could go wrong with the levels being generated.____
 
 **The three reports disagree. Why?** *(Look at what decides whether a room gets monsters. Then say
 what that implies about how long a bug like this can survive.)*
 
+```
+These 3 reports disagree because different seeds produce different results when generating rooms
+and populating them with monsters. The cave builder randomly connects rooms and this can cause different numbers
+of unreachable rooms. The ring builder can populate the entrance with monsters depending on seed.
+This means bugs involving randomness can go unnoticed for a long time if we only test with seeds that
+don't end up exposing them. The bugs exist, but their affects aren't always visible to us.
+```
 
 **What does all of this tell you about the test suite you have been building for eight weeks?**
-
-
+```
+Even though we've spent eight weeks building our test suite, it still doesn't catch every problem unfortunately.
+All 110 of our tests passed, but the dungeon reports still exposed issues that went undetected by our tests.
+We still need to build on our tests as we add new features.
+```
 ---
 
 ## 2. BEFORE — find the drift
@@ -93,27 +146,30 @@ them side by side in two editor windows.
 
 | Step | Corridor | Cave | Ring |
 |---|---|---|---|
-| 1. create the rooms | | | |
+| 1. create the rooms | r=0 | r=0 | r=0 |
 | 2. connect them | own shape | own shape | own shape |
-| 3. entrance flavour | | | |
-| 4. populate — **which index does the loop start at?** | | | |
-| 5. prune unreachable rooms | | | |
+| 3. entrance flavour | yes | yes | yes |
+| 4. populate — **which index does the loop start at?** | r=1 | r=1 | r=0 |
+| 5. prune unreachable rooms | yes | no | yes |
 
-**Which step is genuinely different between the three?** ______
+**Which step is genuinely different between the three?** ___Step 2, connecting the rooms___
 
 **Which differences are NOT about the shape of the level?**
 
+>  Step 4 & 5 = populate * prune unreachable rooms
 
 **For each, say what the consequence is for a player:**
 
 | Drift | What the player experiences |
 |---|---|
-| | |
-| | |
+| Cave skips pruning unreachable rooms | May be unable to reach certain rooms or exit |
+| Ring populates starting at r=0 | May spawn in a room w monsters & immediately enter combat |
 
 **Neither of these is a typo. Both are what happens when one algorithm exists in three copies. In
 one sentence: why did the compiler not help?**
 
+>The compiler didn't help to catch these issues because the code is valid,
+even though some builders accidentally skip steps or do them differently.
 
 **A faster way to find this class of bug, which you should keep:**
 
@@ -123,7 +179,16 @@ grep -n 'for (int r = [01]; r < rooms.size(); r++)' src/main/java/dungeonforge/c
 
 **Paste the output. What does the pattern of 0s and 1s tell you?**
 
-
+```
+$ grep -n 'for (int r = [01]; r < rooms.size(); r++)' src/main/java/dungeonforge/core/GameWorld.java
+96:        for (int r = 1; r < rooms.size(); r++) {
+120:        for (int r = 1; r < rooms.size(); r++) {
+133:        for (int r = 1; r < rooms.size(); r++) {
+180:        for (int r = 0; r < rooms.size(); r++) {
+```
+>The pattern of 0s and 1s shows that 3 loops skip the entrance room, while one starts at room 0.
+This is an inconsistency that allows monsters to spawn in the entrance room,
+making it immediately unsafe for the player.
 ---
 
 ## 3. BEFORE — the counting
@@ -138,12 +203,12 @@ grep -c 'switch (d % ' src/main/java/dungeonforge/core/GameWorld.java
 
 | | Before | After |
 |---|---|---|
-| `GameWorld.java` lines | | |
-| times room creation is written | | |
-| times entrance flavour is written | | |
-| times the populate loop is written | | |
-| `switch` statements over level shape | | |
-| levels satisfying every invariant (seed 3) | | |
+| `GameWorld.java` lines | 269 | |
+| times room creation is written | 3 | |
+| times entrance flavour is written | 3 | |
+| times the populate loop is written | 4 | |
+| `switch` statements over level shape | 1 | |
+| levels satisfying every invariant (seed 3) | 2 of 4 | |
 
 *(Fill the After column at the end of the sprint. Nothing in it may be a guess.)*
 

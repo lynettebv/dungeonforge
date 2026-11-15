@@ -1,12 +1,6 @@
 package dungeonforge.items;
 
 /**
- * WEEK 4 -- a weapon.
- * WEEK 9 STARTER -- and the root of this week's problem.
- *
- * Nothing is wrong with THIS class. The problem is the seven classes that extend it.
- * Open FlamingFrostVampiricWeapon and count how many times the fire arithmetic appears in
- * this package. Then work out what a FOURTH enchantment would cost.
  *
  * Two changes were needed to make the subclasses below possible, and both are dominoes:
  * the fields went from private to protected, and getDamage()/getValue()/describe() stopped
@@ -21,5 +15,7 @@ public interface Weapon extends Item {
      * Zero for an ordinary weapon. Combat calls this after every player strike.
      */
     default int lifesteal() { return 0; }
+
+    default Weapon peel() { return this; }
 
 }
