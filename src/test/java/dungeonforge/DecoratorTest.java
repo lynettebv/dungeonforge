@@ -53,8 +53,8 @@ class DecoratorTest {
         // the failure then surfaces several assertions later looking like a pattern bug.
         assertFalse(c instanceof NoCommand,
                 "SETUP ERROR, not a pattern bug: '" + input + "' was refused before it ran. "
-                        + "Mode is " + ctx.getState().name() + ", whose verbs are " + ctx.allowedVerbs()
-                        + ". Did you call ctx.syncState() after putting a monster in the room?");
+              + "Mode is " + ctx.getState().name() + ", whose verbs are " + ctx.allowedVerbs()
+              + ". Did you call ctx.syncState() after putting a monster in the room?");
         c.execute();
         history.push(c);
     }
@@ -183,29 +183,28 @@ class DecoratorTest {
         assertTrue(EnchantmentRegistry.known().contains("keen"));
     }
 
-    // ================= US-7.4: order is semantics, not style =================
-
+    // ================= US-7.4: =================
     @Test
     void orderChangesTheResultForMultiplyingDecorators() {
-        int keenThenFire = new FlamingWeapon(new KeenWeapon(sword())).getDamage();  // 12 + 4
-        int fireThenKeen = new KeenWeapon(new FlamingWeapon(sword())).getDamage();  // round(12*1.5)
+        int keenThenFire = new FlamingWeapon(new KeenWeapon(sword())).getDamage();
+        int fireThenKeen = new KeenWeapon(new FlamingWeapon(sword())).getDamage();
 
         assertEquals(16, keenThenFire);
         assertEquals(18, fireThenKeen);
         assertNotEquals(keenThenFire, fireThenKeen,
-                "if these were equal, order would not matter and this test would be pointless");
+                "If these were equal, order would not matter nad this test would be pointless");
     }
 
     @Test
     void orderChangesHowMuchAVampiricWeaponDrinks() {
-        assertEquals(3, new VampiricWeapon(new FlamingWeapon(sword())).lifesteal()); // (8+4)/4
-        assertEquals(2, new FlamingWeapon(new VampiricWeapon(sword())).lifesteal()); // 8/4
+        assertEquals(3, new VampiricWeapon(new FlamingWeapon(sword())).lifesteal());
+        assertEquals(2, new FlamingWeapon(new VampiricWeapon(sword())).lifesteal());
     }
 
     @Test
     void twoVampiricLayersDrinkTwice() {
         assertEquals(4, new VampiricWeapon(new VampiricWeapon(sword())).lifesteal(),
-                "the inner drinks 2 from base 8; the outer drinks 2 more and adds the inner's");
+                "the inner drinks 2 from the base 8 ; the outer drinks 2 more and adds the inner's");
     }
 
     // ================= the payoff: Combat never learned any of this =================

@@ -49,7 +49,10 @@ public class GameContext {
     }
 
     public void syncState() {
-        if (!player.isAlive() || !running) {
+        if (state != null && state.isTerminal()) {
+            return;
+        }
+        if (!player.isAlive()) {
             transitionTo(new GameOverState());
             return;
         }
