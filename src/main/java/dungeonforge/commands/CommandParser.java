@@ -7,6 +7,7 @@ import dungeonforge.events.AchievementSystem;
 import dungeonforge.events.Quest;
 import dungeonforge.events.QuestTracker;
 import dungeonforge.items.Item;
+import dungeonforge.states.GameOverState;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -74,10 +75,23 @@ public class CommandParser {
         register("south", (c, a) -> new MoveCommand(c, "south"));
         register("down",  (c, a) -> new MoveCommand(c, "down"));
 
+        // WEEK 10 (PROVIDED) -- two more compass directions, so a level shape can be something
+        // other than a line or a loop. Exits live in a Map keyed by direction name, so the set
+        // of legal direction words is also the limit on how many doors a room can have.
+        //
+        // NOTE, and it is the exact collision Week 7's evidence sheet predicted: "e" is already
+        // taken by `equip`, so east gets no short form. In an if/else chain that collision would
+        // have compiled silently and the earlier branch would have won. Here both claims on "e"
+        // would sit in one Map you can print, and the second would visibly overwrite the first.
+        register("east",  (c, a) -> new MoveCommand(c, "east"));
+        register("west",  (c, a) -> new MoveCommand(c, "west"));
+        alias("w", "west");
+
         // WEEK 9 (PROVIDED) -- the whole wiring cost of two new verbs. Four lines.
         register("equip", EquipCommand::new);
         alias("e", "equip");
         register("enchant", EnchantCommand::new);
+        register("disenchant", DisenchantCommand::new);
         alias("n", "north");
         alias("s", "south");
         alias("d", "down");
@@ -155,6 +169,7 @@ public class CommandParser {
 
         register("quit", (c, a) -> new SimpleCommand("quit", () -> {
             c.getBus().message("You lay down your pack.");
+            c.transitionTo(new GameOverState());
             c.stop();
         }));
         alias("exit", "quit");
