@@ -219,30 +219,38 @@ grep -c 'switch (d % ' src/main/java/dungeonforge/core/GameWorld.java
 **Paste `git diff --stat HEAD~1` for the commit that added the fourth shape:**
 
 ```
-
+$ git diff --stat HEAD~1   
+ .../dungeonforge/generate/GeneratorRegistry.java   |  1 +
+ .../java/dungeonforge/generate/SpokeGenerator.java | 30 ++++++++++++++++++++++
+ 2 files changed, 31 insertions(+)
 ```
 
-**New files:** ______  **Modified files:** ______  **Lines added:** ______
+**New files:** ___1___  **Modified files:** ___1___  **Lines added:** ___31___
 
-**Is `GameWorld.java` in that diff?** ______ **Why not?**
+**Is `GameWorld.java` in that diff?** ___No___ **Why not?**
 
+Because we moved what varied and the invariant methods out into a Template Method.
 
 ### The other half of the receipt — what the old design would have cost
 
 **(a)** To add a spoke shape to the starter, which existing method would you have copied?
 *(Be honest — you would copy the one whose shape is closest, not the one that is correct.)*
 
+> buildRingLevel()
 ______
 
-**(b)** Roughly how many lines would that have added to `GameWorld.java`? ______
+**(b)** Roughly how many lines would that have added to `GameWorld.java`? ___48___
 
 **(c)** **The question that matters.** Look at the method you named in (a). Run the `grep` from
 Part 2 on it. Does it have any of the drift you catalogued?
 
+> Yes because buildRingLevel() starts its population loop at r = 0 instead of r = 1
 ______
 
 **So what would have happened to the new level's invariants?**
 
+> The new spoke level could possibly spawn monsters in the entrance room, which would break the safety-spawn invariant.
+> Its room connections could still be valid, but that wouldn't prevent the spawn issue.
 
 **(d)** Now check your answer against reality. Your instructor measured it: the fourth shape was
 added to the starter by copying `buildRingLevel`, and on **the default seed** the report went
@@ -253,7 +261,8 @@ went from 1 to 2, and **it compiled on the first attempt.**
 
 > Write the conclusion as a sentence with the word *propagate* in it.
 
----
+--- If we copy the old buildRingLevel() method it would propagate its existing bug into the new spoke shape,
+which would allow monsters to spawn in the entrance room even though the code compiles successfully.
 
 ## 5. AFTER — what you did not write
 
@@ -261,12 +270,19 @@ Your fourth shape produces levels with no orphaned rooms and an empty entrance.
 
 **Find the reachability check in `SpokeGenerator.java`.** Where is it? ______
 
+> Reachability is in the Abstract base class & we didn't have to implement it into the SpokeGenerator
+> because it was an inherited invariant.
+
 **Find the entrance guard in `SpokeGenerator.java`.** Where is it? ______
+
+> Same thing, in the Abstract base class & is an inherited variant.
 
 **In two or three sentences: explain how a class can satisfy an invariant it does not implement,
 and what had to be true of `generate()` for that to work.**
 
-
+> It satisfies these invariants because it inherits the template method from the baseclass.
+> That method had to be final and the invariant operations had to be private, so the subclass
+> couldn't modify them, to guarantee the invariant.
 ---
 
 ## 6. AFTER — the honest accounting
@@ -279,7 +295,9 @@ Two of the starter's levels were broken. Both are fixed now.
 **If you did not, describe what you actually did instead.** *(There is a precise way to say this,
 and it involves the word "deleted".)*
 
-
+> No, instead of fixing the bugs individually, we actually deleted the three duplicated level-building methods from
+> GameWorld.java and moved their shared steps into LevelGenerator. This eliminated the inconsistencies because every
+> shape now follows the same algorithm.
 ---
 
 ## 7. Retro line
@@ -287,9 +305,15 @@ and it involves the word "deleted".)*
 **First, the carry-over.** One sentence on what `disenchant` taught you about Decorator that
 building the decorators did not.
 
-
+> Disenchant taught me that decorators can also be removed one layer at a time,
+> not just added, without the need to check the specific type of decorator.
 
 
 **One sentence on something Template Method gave you, and one on something it took away.** *(It
 does take something. Head First is clear about it on p. 302 — a subclass cannot change the order
 of the steps, and one day you will want to.)*
+
+>Template Method gave us one consistent algorithm that every level shape can follow while preventing
+> subclasses from accidentally skipping important steps.
+>On the other hand, it removes flexibility because subclasses cannot change the order of the steps,
+> even if a different order might be useful later.

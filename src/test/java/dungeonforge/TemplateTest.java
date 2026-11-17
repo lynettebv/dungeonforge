@@ -4,14 +4,18 @@ import dungeonforge.config.GameConfig;
 import dungeonforge.config.RandomSource;
 import dungeonforge.core.DungeonLevel;
 import dungeonforge.core.DungeonReport;
+import dungeonforge.core.GameWorld;
+import dungeonforge.core.Player;
 import dungeonforge.core.Room;
 import dungeonforge.factory.MonsterFactory;
 import dungeonforge.factory.ThemeKit;
 import dungeonforge.factory.ThemeRegistry;
 import dungeonforge.generate.CaveGenerator;
 import dungeonforge.generate.CorridorGenerator;
+import dungeonforge.generate.GeneratorRegistry;
 import dungeonforge.generate.LevelGenerator;
 import dungeonforge.generate.RingGenerator;
+import dungeonforge.generate.SpokeGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -36,7 +40,7 @@ class TemplateMethodTest {
 
     private static List<LevelGenerator> allShapes() {
         return List.of(new CorridorGenerator(), new CaveGenerator(),
-                new RingGenerator());
+                new RingGenerator(), new SpokeGenerator());
     }
 
     // ================= US-8.1: the algorithm lives in one place =================
@@ -192,5 +196,68 @@ class TemplateMethodTest {
                 }
             }
         }
+    }
+
+    // ================= US-8.4: the fourth shape =================
+
+    @Test
+    void theRegistryHoldsOneEntryPerShape() {
+        GeneratorRegistry registry = new GeneratorRegistry();
+        assertEquals(4, registry.size());
+        assertEquals(List.of("corridor", "cave", "ring", "spoke"), registry.shapeNames());
+    }
+
+    @Test
+    void depthOneIsAlwaysACorridorSoTheGameOpensSimply() {
+        assertEquals("corridor", new GeneratorRegistry().forDepth(1).shapeName());
+    }
+
+    @Test
+    void theFourthShapeNeededNoChangeToTheOtherThree() {
+        assertEquals("corridor", new CorridorGenerator().shapeName());
+        assertEquals("cave", new CaveGenerator().shapeName());
+        assertEquals("ring", new RingGenerator().shapeName());
+    }
+
+    // ================= the whole world, end to end =================
+
+    @Test
+    void aGeneratedWorldSatisfiesEveryInvariantOnEveryLevel() {
+        GameWorld world = new GameWorld(new Player("Tester"));
+        for (DungeonLevel level : world.getLevels()) {
+            assertEquals(0, DungeonReport.countOrphans(level),
+                    "level " + level.getDepth() + " has orphaned rooms");
+        }
+        assertTrue(world.startingRoom().getMonsters().isEmpty(),
+                "the player must not materialise in a fight");
+    }
+
+    @Test
+    void everyLevelButTheLastHasAReachableStaircase() {
+        GameWorld world = new GameWorld(new Player("Tester"));
+        List<DungeonLevel> levels = world.getLevels();
+        for (int i = 0; i + 1 < levels.size(); i++) {
+            assertTrue(DungeonReport.stairsReachable(levels.get(i)),
+                    "level " + levels.get(i).getDepth() + ": cannot walk to the stairs down");
+        }
+    }
+
+    @Test
+    void theWorldStillHasMonstersAndLootAfterAllThatPruning() {
+        GameWorld world = new GameWorld(new Player("Tester"));
+        assertTrue(world.totalMonsters() > 0);
+        assertTrue(world.totalLoot() > 0);
+    }
+
+    /** US-8.4's receipt, as an invariant rather than a claim: the seed-3 level is clean too. */
+    @Test
+    void theInvariantsHoldOnTheSeedThatExposedTheOldBugs() {
+        RandomSource.getInstance().reseed(3L);
+        GameWorld world = new GameWorld(new Player("Tester"));
+        int orphans = 0, spawn = 0;
+        for (DungeonLevel level : world.getLevels()) orphans += DungeonReport.countOrphans(level);
+        spawn = world.startingRoom().getMonsters().size();
+        assertEquals(0, orphans, "seed 3 produced 4 orphaned rooms before US-8.1");
+        assertEquals(0, spawn, "seed 3 spawn-camped the player before US-8.1");
     }
 }

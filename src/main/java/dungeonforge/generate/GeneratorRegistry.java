@@ -10,6 +10,7 @@ public class GeneratorRegistry {
         shapes.add(new CorridorGenerator());
         shapes.add(new CaveGenerator());
         shapes.add(new RingGenerator());
+        shapes.add(new SpokeGenerator());
     }
 
     public LevelGenerator forDepth(int depth) { return shapes.get((depth - 1) % shapes.size()); }
