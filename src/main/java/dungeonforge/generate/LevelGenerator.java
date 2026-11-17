@@ -56,9 +56,39 @@ public abstract class LevelGenerator {
         }
         rooms.removeIf(r -> !seen.contains(r));
     }
+
+    protected static void connect(Room a, String direction, Room b) {
+        a.link(direction, b);
+        b.link(opposite(direction), a);
+    }
+
+    protected boolean tryConnect(Room a, String direction, Room b) {
+        if (a == b) return false;
+        if (a.getExits().containsKey(direction)) return false;
+        if (b.getExits().containsKey(opposite(direction))) return false;
+        connect(a, direction, b);
+        return true;
+    }
+
+    protected static final String[] DIRECTIONS = {"north", "south", "east", "west"};
+
+    protected static String opposite(String direction) {
+        return switch(direction) {
+            case "north" -> "south";
+            case "south" -> "north";
+            case "east" -> "west";
+            case "west" -> "east";
+            default -> "south";
+        };
+    }
+
+    protected static RandomSource rng() {
+        return RandomSource.getInstance();
+    }
+
     private RoomPopulator populatorFor(ThemeKit theme, boolean isFinalRoom) {
         if (isFinalRoom) return new BossRoomPopulator(theme);
-        if (RandomSource.getInstance().nextDouble() < 0.30) return new TreasureRoomPopulator(theme);
+        if (rng().nextDouble() < 0.30) return new TreasureRoomPopulator(theme);
         return new StandardRoomPopulator(theme);
     }
 }

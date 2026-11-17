@@ -66,7 +66,6 @@ class TemplateMethodTest {
     }
 
     /** A well-written shape wastes nothing, so the invariant finds nothing to prune. */
-    /* TODO: This will only be valid after US-8.3 refactor.
     @Test
     void everyShapeKeepsAllTheRoomsItWasGiven() {
         for (LevelGenerator shape : allShapes()) {
@@ -75,7 +74,6 @@ class TemplateMethodTest {
                     shape.shapeName() + " threw rooms away; enforceReachability is a net, not a bin");
         }
     }
-    */
 
     @Test
     void everyShapeSetsFlavourOnTheEntrance() {
