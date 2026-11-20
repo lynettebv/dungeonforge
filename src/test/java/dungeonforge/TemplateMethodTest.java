@@ -40,7 +40,7 @@ class TemplateMethodTest {
 
     private static List<LevelGenerator> allShapes() {
         return List.of(new CorridorGenerator(), new CaveGenerator(),
-                new RingGenerator(), new SpokeGenerator());
+                       new RingGenerator(), new SpokeGenerator());
     }
 
     // ================= US-8.1: the algorithm lives in one place =================
