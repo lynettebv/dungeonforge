@@ -230,4 +230,110 @@ class DecoratorTest {
                 "lifesteal must offset some of the counter-attack; got " + player.getHp());
         assertTrue(m.getHp() < 200);
     }
+
+    // ============= US-7.5 (carried over from Sprint 7): taking it back off =============
+
+    @Test
+    void peelingAPlainWeaponGivesBackTheSameObject() {
+        Weapon plain = sword();
+        assertSame(plain, plain.peel(),
+                "a plain weapon peels to ITSELF -- that identity is why DisenchantCommand "
+              + "needs no instanceof");
+    }
+
+    @Test
+    void peelingADecoratorGivesBackWhatWasUnderneath() {
+        Weapon bare = sword();
+        Weapon frosted = new FrostWeapon(bare);
+        assertSame(bare, frosted.peel(), "one layer off must be the exact object it wrapped");
+    }
+
+    @Test
+    void disenchantRemovesOnlyTheOUTERMOSTLayer() {
+        player.addItem(new FlamingWeapon(new FrostWeapon(sword())));
+        assertEquals(15, ((Weapon) player.findItem("sword")).getDamage());   // 8 + 3 + 4
+
+        run("disenchant sword");
+
+        Weapon now = (Weapon) player.findItem("sword");
+        assertEquals("Frost Iron Sword", now.getName(),
+                "Flaming went on last, so Flaming comes off first");
+        assertEquals(11, now.getDamage(), "8 + 3 -- the frost layer survived");
+    }
+
+    @Test
+    void thereIsNoWayToReachPastTheOuterLayer() {
+        player.addItem(new FlamingWeapon(new FrostWeapon(sword())));
+
+        run("disenchant sword");
+        assertEquals("Frost Iron Sword", ((Weapon) player.findItem("sword")).getName());
+        run("disenchant sword");
+        assertEquals("Iron Sword", ((Weapon) player.findItem("sword")).getName());
+
+        // The point of this test is the name that NEVER appeared. "Flaming Iron Sword" was not
+        // reachable by any number of disenchants, because removing the inner layer and keeping
+        // the outer one is not a thing a decorator chain can do. Last on, first off.
+        assertEquals(8, ((Weapon) player.findItem("sword")).getDamage());
+    }
+
+    @Test
+    void disenchantingTheWeaponInYourHandChangesWhatYouHitWith() {
+        player.addItem(new FlamingWeapon(sword()));
+        run("equip sword");
+        int armed = player.getAttackPower();
+
+        run("disenchant sword");
+        assertEquals(armed - 4, player.getAttackPower(),
+                "the equipped slot must follow the weapon back down too -- the stale-hand bug "
+              + "has a mirror image, and it is not fixed by the pattern either");
+        assertEquals("Iron Sword", player.getEquippedWeapon().getName());
+    }
+
+    @Test
+    void disenchantingAPlainWeaponIsRefusedAndChangesNothing() {
+        player.addItem(sword());
+        run("equip sword");
+        int armed = player.getAttackPower();
+
+        run("disenchant sword");
+        assertEquals(armed, player.getAttackPower());
+        assertEquals("Iron Sword", player.getEquippedWeapon().getName());
+        assertEquals(1, player.getInventory().size(), "a refusal must not duplicate the weapon");
+    }
+
+    @Test
+    void undoingADisenchantPutsTheEnchantmentBack() {
+        player.addItem(new FlamingWeapon(sword()));
+        run("equip sword");
+        run("disenchant sword");
+        assertEquals("Iron Sword", player.getEquippedWeapon().getName());
+
+        assertTrue(history.undoLast());
+        assertEquals("Flaming Iron Sword", player.getEquippedWeapon().getName(),
+                "the snapshot already stores the hand -- DisenchantCommand needs no undo() of "
+              + "its own, and writing one would double-restore");
+        assertEquals(1, player.getInventory().size());
+    }
+
+    @Test
+    void disenchantCommandContainsNoTypeTestForDecorators() throws Exception {
+        String code = codeOnly(java.nio.file.Files.readString(
+                java.nio.file.Path.of("src/main/java/dungeonforge/commands/DisenchantCommand.java")));
+
+        assertFalse(code.contains("instanceof WeaponDecorator"),
+                "peel() is on Weapon precisely so this command never has to ask what it is "
+              + "holding. The type test you want to write is usually a missing method.");
+        assertFalse(code.contains("unwrap"),
+                "unwrap() is gone; peel() replaced it");
+    }
+
+    /**
+     * Strips comments before searching, because a source-inspection assertion that reads the
+     * commentary is tripped by any comment that MENTIONS the thing it is looking for --
+     * including the comment explaining why the code does not do it.
+     */
+    private static String codeOnly(String source) {
+        return source.replaceAll("(?s)/\\*.*?\\*/", "")
+                     .replaceAll("(?m)//.*$", "");
+    }
 }

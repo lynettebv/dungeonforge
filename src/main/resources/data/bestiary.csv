@@ -1,0 +1,24 @@
+# bestiary.csv
+#
+# Exported from DungeonForge 0.4.2 by the previous team, 2024. Pipe-delimited.
+# The exporter is gone, the team is gone, and this file is the only copy.
+#
+# MOB_ID       -- UPPER_SNAKE internal key
+# DISPLAY      -- name shown to the player
+# HIT_DICE     -- number of hit dice; the 0.4 engine rolled these at spawn time
+# DMG          -- damage expression, "<count>d<sides>+<bonus>"
+# ZONE         -- 1 crypt, 2 forge, 3 frost, 4 winterfell
+# TIER         -- MINION or BOSS
+# AI           -- BRAWLER, ARCHER, COWARD, MEDIC, SAPPER
+#
+# MOB_ID|DISPLAY|HIT_DICE|DMG|ZONE|TIER|AI
+BARROW_WIGHT|Barrow Wight|4|1d6+2|1|MINION|BRAWLER
+GRAVE_MOTH|Grave Moth|2|1d4|1|MINION|COWARD
+CRYPT_WARDEN|Crypt Warden|11|2d6+3|1|BOSS|BRAWLER
+CINDER_WASP|Cinder Wasp|2|1d6+1|2|MINION|ARCHER
+BELLOWS_THRALL|Bellows Thrall|5|1d8|2|MINION|BRAWLER
+SLAG_CHIRURGEON|Slag Chirurgeon|6|1d4+1|2|MINION|MEDIC
+HOARFROST_ELK|Hoarfrost Elk|7|2d4+1|3|MINION|COWARD
+GLACIER_HUSK|Glacier Husk|6|1d8+2|3|MINION|BRAWLER
+WEEPING_SENTINEL|Weeping Sentinel|5|1d6|4|MINION|ARCHER
+TUNNEL_SAPPER|Tunnel Sapper|4|1d6+1|4|MINION|SAPPER

@@ -40,7 +40,7 @@ import java.util.List;
  */
 public final class Main {
 
-    public static final String VERSION = "0.10.0";
+    public static final String VERSION = "0.12.0";
 
     private Main() { }
 
@@ -85,6 +85,16 @@ public final class Main {
             return;
         }
 
+        // =============================================================================
+        // WEEK 12 -- THE ASSEMBLY BLOCK. Everything from here to the first `look` below is
+        // wiring: five collaborators, four subscriptions, and an order that matters.
+        //
+        // Count the listener classes in events/ before you read on. Then count the
+        // bus.subscribe calls here. US-9.2 is about the difference.
+        //
+        // Nothing enforces that this block is complete, or that it is the same block the
+        // script path gets, because there is only one copy of it and it lives in main().
+        // =============================================================================
         EventBus bus = new EventBus();
         QuestTracker quests = new QuestTracker(bus);
         AchievementSystem achievements = new AchievementSystem(bus);
@@ -93,6 +103,13 @@ public final class Main {
         bus.subscribe(achievements);
         bus.subscribe(log);
         bus.subscribe(new ConsolePrinter());
+
+        // WEEK 12 (US-9.1) -- YOUR ADAPTER PLUGS IN HERE.
+        //
+        // Register the previous team's bestiary with the factory, through the adapter you
+        // write. One line. You will MOVE that line into GameSession in US-9.2 -- that is
+        // expected, and it is the point: a wiring step that lives in main() has to be
+        // remembered by every caller, and there is about to be more than one caller.
 
         CommandHistory history = new CommandHistory();
         GameContext ctx = new GameContext(world, player, bus, new Combat(bus), history);
