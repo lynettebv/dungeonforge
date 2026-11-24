@@ -200,20 +200,52 @@ awk '/public static void main/{on=1} on{n++} on&&/^    }$/&&n>3{print n; exit}' 
 git diff --stat HEAD~1          # on the us-9.1 commit
 diff src/main/java/dungeonforge/legacy/LegacyBestiary.java  <the file you were given>
 diff src/main/java/dungeonforge/factory/MonsterFactory.java <the file you started with>
-python3 scripts/codeonly.py src/main/java/dungeonforge/factory/MonsterFactory.java \
+py scripts/codeonly.py src/main/java/dungeonforge/factory/MonsterFactory.java \
   | grep -ciE 'bestiary|csv|MOB_ID|HIT_DICE'
 ```
 
 **Paste all four.**
 
 ```
+1. 
+ .gitignore                                         |   1 +
+ docs/evidence.week12.md                            | 111 +++++++++---
+ src/main/java/dungeonforge/Main.java               |  27 +++
+ src/main/java/dungeonforge/core/Combat.java        |   2 +-
+ src/main/java/dungeonforge/events/CombatLog.java   |   2 +-
+ src/main/java/dungeonforge/events/DangerMeter.java |  31 ----
+ src/main/java/dungeonforge/events/EventType.java   |   2 +-
+ .../java/dungeonforge/factory/MonsterSource.java   |   9 +
+ .../dungeonforge/items/EnchantmentRegistry.java    |  13 +-
+ .../dungeonforge/legacy/LegacyBestiaryAdapter.java | 111 ++++++++++++
+ src/test/java/dungeonforge/AdapterFacadeTest.java  | 201 +++++++++++++++++++++
+ 11 files changed, 449 insertions(+), 61 deletions(-)
 
+2.
+diff -u \
+  src/main/java/dungeonforge/legacy/LegacyBestiary.java \
+  <(unzip -p ~/Downloads/lab12-adapter-facade-starter.zip \
+  lab12-adapter-facade-starter/src/main/java/dungeonforge/legacy/LegacyBestiary.java)
+  
+ 3. 
+ diff -u \
+  src/main/java/dungeonforge/factory/MonsterFactory.java \
+  <(unzip -p ~/Downloads/lab12-adapter-facade-starter.zip \
+  lab12-adapter-facade-starter/src/main/java/dungeonforge/factory/MonsterFactory.java)
+
+4.
+$ py scripts/codeonly.py src/main/java/dungeonforge/factory/MonsterFactory.java \
+  | grep -ciE 'bestiary|csv|MOB_ID|HIT_DICE'
+0
 ```
 
 **Two of those commands are the deliverable. Which two, and why?**
 
+> The two diff commands, #2 and #3, are the deliverable because they produce no output at all.
+> This proves that neither MonsterFactory nor LegacyBestiary were modified.
+> Adapter allows these two classes to work together without changing their original code.
 
-**`blueprintCount()` before:** ______ **after:** ______
+**`blueprintCount()` before:** ___19___ **after:** ___29___
 
 ### US-9.2, the Facade
 
