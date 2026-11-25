@@ -1,8 +1,14 @@
 package dungeonforge;
 
+import dungeonforge.commands.GameContext;
 import dungeonforge.config.GameConfig;
 import dungeonforge.config.RandomSource;
+import dungeonforge.core.DungeonLevel;
+import dungeonforge.core.GameWorld;
+import dungeonforge.core.Monster;
+import dungeonforge.core.Room;
 import dungeonforge.events.EventType;
+import dungeonforge.events.GameEvent;
 import dungeonforge.factory.MonsterDef;
 import dungeonforge.factory.MonsterFactory;
 import dungeonforge.factory.MonsterSource;
@@ -11,6 +17,7 @@ import dungeonforge.items.EnchantmentRegistry;
 import dungeonforge.items.Weapon;
 import dungeonforge.legacy.LegacyBestiary;
 import dungeonforge.legacy.LegacyBestiaryAdapter;
+import dungeonforge.session.GameSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -172,6 +179,96 @@ class AdapterFacadeTest {
         assertTrue(factory.idsForTheme("forge").contains("paper_golem"));
     }
 
+    // ===================== US-9.2 : the FACADE =====================
+
+    @Test
+    void theSessionSubscribesTheListenerThatNobodyEverWiredUp() {
+        GameSession session = GameSession.start("Tester");
+        assertTrue(session.listenerCount() >= 5,
+                "quests, achievements, log, DAMAGE METER and the transcript; got "
+                        + session.listenerCount());
+    }
+
+    @Test
+    void theDamageMeterActuallyFiresNow() {
+        GameSession session = GameSession.start("Tester");
+        int threshold = (int) Math.round(0.25 * GameConfig.getInstance().getDouble("playerStartingHp"));
+
+        session.getPlayer().setHp(threshold - 1);
+        session.getBus().publish(GameEvent.of(EventType.DAMAGE_TAKEN, "amount", 1));
+
+        boolean warned = session.transcript().stream().anyMatch(s -> s.contains("DANGER"));
+        assertTrue(warned,
+                "DamageMeter has existed since Week 5 and had never fired, because main() "
+                        + "never subscribed it. The facade owns the listener list now.");
+    }
+
+    @Test
+    void legacyMonstersAppearInAGeneratedDungeon() {
+        // BOTH assembly paths, because they are two separate pieces of ordering code and an
+        // earlier version of this test only checked one of them. A mutation that broke the
+        // order in start() passed, which made the test decorative for the path players use.
+        RandomSource.resetForTests();
+        assertTrue(hasLegacyMonster(GameSession.start("Tester").getWorld()),
+                "GameSession.start() must register every source BEFORE generating the world; "
+                        + "blueprints registered afterwards can never spawn");
+
+        RandomSource.resetForTests();
+        assertTrue(hasLegacyMonster(GameSession.buildWorldOnly("Tester")),
+                "and so must the diagnostic path, or --report describes a different dungeon");
+    }
+
+    private static boolean hasLegacyMonster(GameWorld world) {
+        Set<String> legacyNames = new HashSet<>();
+        for (MonsterDef d : adapter().definitions()) legacyNames.add(d.name);
+        for (DungeonLevel level : world.getLevels()) {
+            for (Room room : level.getRooms()) {
+                for (Monster m : room.getMonsters()) {
+                    if (legacyNames.contains(m.getName())) return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Test
+    void theTurnSequenceExistsExactlyOnce() throws Exception {
+        String main = codeOnly(java.nio.file.Files.readString(
+                java.nio.file.Path.of("src/main/java/dungeonforge/Main.java")));
+        assertFalse(main.contains("syncState"),
+                "Main must not run a turn itself; that is what let the script path drift");
+        assertFalse(main.contains(".execute()"),
+                "nor parse-and-execute; one copy of the turn sequence, in GameSession.runLine");
+
+        String session = codeOnly(java.nio.file.Files.readString(
+                java.nio.file.Path.of("src/main/java/dungeonforge/session/GameSession.java")));
+        assertEquals(1, countOf(session, "ctx.syncState()"),
+                "GameSession must call syncState in exactly one place");
+    }
+
+    @Test
+    void aTurnDrivenThroughTheFacadeCannotWalkOutOfARoomWithALiveHostile() {
+        GameSession session = GameSession.start("Tester");
+        GameContext ctx = session.getContext();
+
+        // Walk until we are standing in a room that still has something alive in it.
+        for (int i = 0; i < 12 && !ctx.getCurrentRoom().hasLivingMonsters(); i++) {
+            session.runLine("north");
+        }
+        assertTrue(ctx.getCurrentRoom().hasLivingMonsters(),
+                "test needs a hostile room; none found within twelve moves");
+
+        Room before = ctx.getCurrentRoom();
+        assertEquals("Combat", ctx.getState().name(),
+                "arriving beside a live hostile must put the game in combat mode -- the "
+                        + "scripted path used to skip this and the mode never changed");
+
+        session.runLine("north");
+        assertSame(before, ctx.getCurrentRoom(),
+                "combat mode has no movement verbs, so this must have been refused. Before "
+                        + "the facade, a script walked straight past every monster in the dungeon.");
+    }
+
     // ===================== US-8.5 : the carry-over =====================
 
     @Test
@@ -197,5 +294,8 @@ class AdapterFacadeTest {
     private static String codeOnly(String source) {
         return source.replaceAll("(?s)/\\*.*?\\*/", "")
                 .replaceAll("(?m)//.*$", "");
+    }
+    private static int countOf(String text, String target) {
+        return text.split(java.util.regex.Pattern.quote(target), -1).length - 1;
     }
 }

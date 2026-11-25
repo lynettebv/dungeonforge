@@ -208,19 +208,16 @@ py scripts/codeonly.py src/main/java/dungeonforge/factory/MonsterFactory.java \
 
 ```
 1. 
- .gitignore                                         |   1 +
- docs/evidence.week12.md                            | 111 +++++++++---
- src/main/java/dungeonforge/Main.java               |  27 +++
- src/main/java/dungeonforge/core/Combat.java        |   2 +-
- src/main/java/dungeonforge/events/CombatLog.java   |   2 +-
- src/main/java/dungeonforge/events/DangerMeter.java |  31 ----
- src/main/java/dungeonforge/events/EventType.java   |   2 +-
- .../java/dungeonforge/factory/MonsterSource.java   |   9 +
- .../dungeonforge/items/EnchantmentRegistry.java    |  13 +-
- .../dungeonforge/legacy/LegacyBestiaryAdapter.java | 111 ++++++++++++
- src/test/java/dungeonforge/AdapterFacadeTest.java  | 201 +++++++++++++++++++++
- 11 files changed, 449 insertions(+), 61 deletions(-)
 
+lynet@LynetteV MINGW64 ~/IdeaProjects/dungeonforge (feat/US-9.2)
+$ git diff --stat HEAD~1 
+ docs/evidence.week12.md                            |  38 ++++-
+ src/main/java/dungeonforge/Main.java               |  10 ++
+ .../java/dungeonforge/factory/MonsterSource.java   |   9 +
+ .../dungeonforge/legacy/LegacyBestiaryAdapter.java | 111 +++++++++++++
+ src/test/java/dungeonforge/AdapterFacadeTest.java  | 185 ++++++++++++++++++++-
+ 5 files changed, 343 insertions(+), 10 deletions(-)
+ 
 2.
 diff -u \
   src/main/java/dungeonforge/legacy/LegacyBestiary.java \

@@ -107,7 +107,7 @@ public class FactoryTest {
 
     @Test
     void everyLevelIsInternallyConsistent() {
-        GameWorld world = new GameWorld(new Player("Tester"));
+        GameWorld world = new GameWorld(new Player("Tester"), factory);
 
         for(DungeonLevel level : world.getLevels()) {
             Set<String> allowed = switch (level.getThemeName()) {
@@ -164,7 +164,7 @@ public class FactoryTest {
 
     @Test
     void theFinalRoomOfTheDungeonHoldsTheBoss() {
-        GameWorld world = new GameWorld(new Player("Tester"));
+        GameWorld world = new GameWorld(new Player("Tester"), factory);
         List<DungeonLevel> levels  = world.getLevels();
         DungeonLevel last = levels.get(levels.size() - 1);
         Room finalRoom = last.getRooms().get(last.getRooms().size() - 1);
@@ -176,9 +176,9 @@ public class FactoryTest {
     @Test
     void theWorldStillGenerateesDeterministicallyFromASeed() {
         RandomSource.getInstance().reseed(77L);
-        int first = new GameWorld(new Player("A")).totalMonsters();
+        int first = new GameWorld(new Player("A"), factory).totalMonsters();
         RandomSource.getInstance().reseed(77L);
-        int second = new GameWorld(new Player("B")).totalMonsters();
+        int second = new GameWorld(new Player("B"), factory).totalMonsters();
 
         assertEquals(first, second, "Singlton's MUST still guarantee a deterministic world.");
     }

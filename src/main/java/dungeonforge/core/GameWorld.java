@@ -43,13 +43,15 @@ import java.util.Set;
 public class GameWorld {
 
     private final Player player;
-    private final MonsterFactory monsterFactory = new MonsterFactory();
-    private final ThemeRegistry themes = new ThemeRegistry(monsterFactory);
+    private final MonsterFactory monsterFactory;
+    private final ThemeRegistry themes;
     private final GeneratorRegistry generators = new GeneratorRegistry();
     private final List<DungeonLevel> levels = new ArrayList<>();
 
-    public GameWorld(Player player) {
+    public GameWorld(Player player, MonsterFactory monsterFactory) {
         this.player = player;
+        this.monsterFactory = monsterFactory;
+        this.themes = new ThemeRegistry(monsterFactory);
         generate();
     }
 
