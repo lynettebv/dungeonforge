@@ -14,6 +14,7 @@ import dungeonforge.core.Player;
 import dungeonforge.events.AchievementSystem;
 import dungeonforge.events.EventBus;
 import dungeonforge.events.QuestTracker;
+import dungeonforge.factory.MonsterFactory;
 import dungeonforge.items.BasicWeapon;
 import dungeonforge.items.EnchantmentRegistry;
 import dungeonforge.items.FlamingWeapon;
@@ -40,7 +41,7 @@ class DecoratorTest {
         GameConfig.resetForTests();
         RandomSource.resetForTests();
         player = new Player("Tester");
-        GameWorld world = new GameWorld(player);
+        GameWorld world = new GameWorld(player, new MonsterFactory());
         EventBus bus = new EventBus();
         history = new CommandHistory();
         ctx = new GameContext(world, player, bus, new Combat(bus), history);
