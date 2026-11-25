@@ -180,13 +180,13 @@ awk '/public static void main/{on=1} on{n++} on&&/^    }$/&&n>3{print n; exit}' 
 
 | | Before | After |
 |---|---|---|
-| `main()` lines | 191 | |
-| `ctx.syncState()` in `Main` | 3 | |
-| copies of the turn sequence | 3 | |
-| `DamageMeter` mentioned outside its own file | 0 | |
-| listener classes subscribed, of 4 | 3 | |
-| monster blueprints available | 79 | |
-| a script can walk past a live hostile | yes | |
+| `main()` lines | 191 | 111 |
+| `ctx.syncState()` in `Main` | 3 | 0 |
+| copies of the turn sequence | 3 | 0 |
+| `DamageMeter` mentioned outside its own file | 0 | 1 |
+| listener classes subscribed, of 4 | 3 | 4 |
+| monster blueprints available | 19 | 29 |
+| a script can walk past a live hostile | yes | no |
 
 *(Fill the After column at the end of the sprint. **Nothing in it may be a guess.**)*
 
@@ -253,27 +253,48 @@ git diff --stat HEAD~1          # on the us-9.2 commit
 **Paste it.**
 
 ```
-
+$ git diff --stat HEAD~1   
+ docs/evidence.week12.md                            |  21 ++-
+ src/main/java/dungeonforge/Main.java               | 136 ++++---------------
+ src/main/java/dungeonforge/core/GameWorld.java     |   8 +-
+ .../java/dungeonforge/session/GameSession.java     | 148 +++++++++++++++++++++
+ src/test/java/dungeonforge/AdapterFacadeTest.java  | 100 ++++++++++++++
+ src/test/java/dungeonforge/CommandTest.java        |   8 +-
+ src/test/java/dungeonforge/DecoratorTest.java      |   3 +-
+ src/test/java/dungeonforge/FactoryTest.java        |   8 +-
+ src/test/java/dungeonforge/SingletonTest.java      |   6 +-
+ src/test/java/dungeonforge/StateTest.java          |   9 +-
+ src/test/java/dungeonforge/TemplateMethodTest.java |  10 +-
+ 11 files changed, 312 insertions(+), 145 deletions(-)
 ```
 
 **One sentence each on what the two numbers mean.** *(They mean different things. One is about a
 format; one is about an order.)*
 
+>These two numbers mean that it cost us that much to gain some simplication in our Main method
+>and to gain 10 new monsters without having to change any of our existing code that relied on a target interface.
+> The Adapter makes the legacy CSV monster data compatible with our existing system without modifying MonsterFactory
+> or LegacyBestiary. While the Facade helped centralize game setup and to connect components in the correct order.
 
 ---
 
 ## 5. AFTER — what you did not have to change
 
-**List every file that learned a CSV exists.** ______
+**List every file that learned a CSV exists.** 
+1. LegacyBestiary
+2. LegacyBestiaryAdapter
+3. GameSession
 
-**Is `MonsterFactory` one of them?** ______
+**Is `MonsterFactory` one of them?** ___No___
 
 **`ThemeKit` picks which monsters appear in a room. How many lines of it did you change to make
-ten new monsters appear?** ______
+ten new monsters appear?** ___0___
 
 **In two or three sentences: explain how a class can use a blueprint that arrived from a file
 format it has never heard of.**
 
+> The class can use a blueprint that arrived from a file format it has never heard of because
+> it never actually sees the bestiary format, only the target format MonsterDef as it should. Thanks to Adapter pattern.
 
 ---
 
@@ -281,27 +302,29 @@ format it has never heard of.**
 
 ### The Adapter's honest half
 
-**`bestiary.csv` has no xp column. Which of the three options did you take?** ______
+**`bestiary.csv` has no xp column. Which of the three options did you take?** ___We derived it.___
 
-**Where in your code does a reader find out that the number is derived?** ______
+**Where in your code does a reader find out that the number is derived?** ___translationNotes() tells the reader___
 
 **One sentence: what would have gone wrong if you had silently defaulted it to 5?**
-
+Nothing, unless someone tries to "tune" the parameter.
 
 **`SAPPER` has no counterpart. What did you do, and what happens when the eleventh unknown AI
 name arrives next semester?**
-
+> We wrote a "default" branch in the mapping to map it to "aggressive" strategy.
 
 ### The Facade's honest half
 
 **Complete this honestly:**
 
 > `GameSession` now knows about eight collaborators and the order they go together in, which
-> means the coupling ______________________________________________
+> means the coupling ___the coupling didn't go away, we just relocated it as a new "Owner Object"___
 
 **Name one thing that got HARDER because `Main` no longer knows those eight classes.** *(There
 is a real answer. Think about what a test needs.)*
 
+>Ooooof, our unit testing had some issues that we had to go x by refactoring multiple
+> object constructors and we had to write getters to allow for easier testing.
 
 ---
 
@@ -312,10 +335,10 @@ Four sentences, and the two costs are not the same cost.
 
 | Pattern | Gave | Took |
 |---|---|---|
-| Adapter | | |
-| Facade | | |
+| Adapter | content from old interface | can't translate everything, no xp, xp was invented |
+| Facade | one front door + DamageMeter fix | the start method builds EVERYTHING, not cheap! |
 
 **And the one-sentence distinction, in your own words, having now written both:** Adapter and
 Facade are both "a class in front of other classes." What made them different in practice?
 
-
+> The Adapter translates incompatible data, while the Facade simplifies how components work together.

@@ -269,6 +269,36 @@ class AdapterFacadeTest {
                         + "the facade, a script walked straight past every monster in the dungeon.");
     }
 
+    // ===================== US-9.3 : the replay receipt =====================
+
+    @Test
+    void theSameInputThroughTwoSessionsProducesIdenticalTranscripts() {
+        List<String> input = List.of("look", "north", "status", "attack", "attack", "look", "status");
+
+        RandomSource.resetForTests();
+        GameSession a = GameSession.start("Delver");
+        for (String line : input) a.runLine(line);
+
+        RandomSource.resetForTests();
+        GameSession b = GameSession.start("Delver");
+        for (String line : input) b.runLine(line);
+
+        assertEquals(a.transcript(), b.transcript(),
+                "Week 7 promised that a recorded session reproduces exactly. Until the turn "
+                        + "sequence existed in one place, that depended on which loop replayed it.");
+        assertFalse(a.transcript().isEmpty(), "a transcript of nothing proves nothing");
+    }
+
+    @Test
+    void theDiagnosticWorldAndThePlayWorldAgree() {
+        RandomSource.resetForTests();
+        int reportMonsters = GameSession.buildWorldOnly("Delver").totalMonsters();
+        RandomSource.resetForTests();
+        int playMonsters = GameSession.start("Delver").getWorld().totalMonsters();
+        assertEquals(reportMonsters, playMonsters,
+                "--report must describe the dungeon you actually play in");
+    }
+
     // ===================== US-8.5 : the carry-over =====================
 
     @Test
